@@ -195,7 +195,7 @@ public class MessengerPlatformCallbackHandler {
                         sendTypingOff(senderId);
                         break;
 
-                    
+
                     case "account linking":
                         sendAccountLinking(senderId);
                         break;
@@ -330,9 +330,15 @@ public class MessengerPlatformCallbackHandler {
         this.sendClient.sendSenderAction(recipientId, SenderAction.TYPING_OFF);
     }
 
-    private void sendAccountLinking(String recipientId) {
-        // supported by messenger4j since 0.7.0
-        // sample implementation coming soon
+    private void sendAccountLinking(String recipientId) throws MessengerApiException, MessengerIOException {
+        final List<Button> buttons = Button.newListBuilder()
+                .addUrlButton("Account linked", "https://www.oculus.com/en-us/rift/").toList()
+                .addPostbackButton("Trigger Postback", "DEVELOPER_DEFINED_PAYLOAD").toList()
+                .addCallButton("Call Phone Number", "+16505551234").toList()
+                .build();
+
+        final ButtonTemplate buttonTemplate = ButtonTemplate.newBuilder("Tap a button", buttons).build();
+        this.sendClient.sendTemplate(recipientId, buttonTemplate);
     }
 
     private AttachmentMessageEventHandler newAttachmentMessageEventHandler() {
