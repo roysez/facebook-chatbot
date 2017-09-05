@@ -331,14 +331,16 @@ public class MessengerPlatformCallbackHandler {
     }
 
     private void sendAccountLinking(String recipientId) throws MessengerApiException, MessengerIOException {
-        final List<Button> buttons = Button.newListBuilder()
-                .addUrlButton("Account linked", "https://www.oculus.com/en-us/rift/").toList()
-                .addPostbackButton("Trigger Postback", "DEVELOPER_DEFINED_PAYLOAD").toList()
-                .addCallButton("Call Phone Number", "+16505551234").toList()
+        // Simulation of account linking
+        final List<QuickReply> quickReplies = QuickReply.newListBuilder()
+                .addTextQuickReply("Статус доставки", "GET_STATUS_DELIVERY_FORM_PAYLOAD").toList()
+                .addTextQuickReply("Замовити курєра", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION").toList()
+                .addLocationQuickReply().toList()
                 .build();
 
-        final ButtonTemplate buttonTemplate = ButtonTemplate.newBuilder("Tap a button", buttons).build();
-        this.sendClient.sendTemplate(recipientId, buttonTemplate);
+        this.sendClient.sendTextMessage(recipientId, "Вітаємо новго користувача нашого сервісу, \n" +
+                " дізнавайтесь статус ваших відправлень" +
+                " Нової Пошти — просто надішліть номер накладної і отримайте всю потрібну інформацію.", quickReplies);
     }
 
     private AttachmentMessageEventHandler newAttachmentMessageEventHandler() {
@@ -376,12 +378,28 @@ public class MessengerPlatformCallbackHandler {
         return event -> {
             logger.debug("Received QuickReplyMessageEvent: {}", event);
 
+
             final String senderId = event.getSender().getId();
             final String messageId = event.getMid();
             final String quickReplyPayload = event.getQuickReply().getPayload();
 
             logger.info("Received quick reply for message '{}' with payload '{}'", messageId, quickReplyPayload);
 
+            if(quickReplyPayload.equals("GET_STATUS_DELIVERY_FORM_PAYLOAD")){
+
+                final List<Button> buttons = Button.newListBuilder()
+                        .addUrlButton("Підтвердити запит", "https://www.oculus.com/en-us/rift/").toList()
+                        .build();
+
+                final ButtonTemplate buttonTemplate = ButtonTemplate.newBuilder("Введіть номер накладної та підтвердіть запит", buttons).build();
+                try {
+                    this.sendClient.sendTemplate(senderId, buttonTemplate);
+                } catch (MessengerApiException e) {
+                    e.printStackTrace();
+                } catch (MessengerIOException e) {
+                    e.printStackTrace();
+                }
+            }
             sendTextMessage(senderId, "Quick reply tapped");
         };
     }
