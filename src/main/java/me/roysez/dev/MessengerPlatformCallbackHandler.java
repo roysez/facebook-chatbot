@@ -195,11 +195,11 @@ public class MessengerPlatformCallbackHandler {
                         sendTypingOff(senderId);
                         break;
 
-                    /*
+                    
                     case "account linking":
                         sendAccountLinking(senderId);
                         break;
-                    */
+
 
                     default:
                         sendTextMessage(senderId, messageText);
