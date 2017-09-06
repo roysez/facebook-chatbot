@@ -25,18 +25,13 @@ import com.github.messenger4j.receive.handlers.PostbackEventHandler;
 import com.github.messenger4j.receive.handlers.QuickReplyMessageEventHandler;
 import com.github.messenger4j.receive.handlers.TextMessageEventHandler;
 import com.github.messenger4j.send.MessengerSendClient;
-import com.github.messenger4j.send.NotificationType;
-import com.github.messenger4j.send.QuickReply;
-import com.github.messenger4j.send.Recipient;
-import com.github.messenger4j.send.SenderAction;
 import com.github.messenger4j.send.buttons.Button;
 import com.github.messenger4j.send.templates.ButtonTemplate;
-import com.github.messenger4j.send.templates.GenericTemplate;
-import com.github.messenger4j.send.templates.ReceiptTemplate;
+
 import java.util.Date;
 import java.util.List;
 
-import me.roysez.dev.sender.Sender;
+import me.roysez.dev.service.Sender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -330,7 +325,7 @@ public class MessengerPlatformCallbackHandler {
             final String senderId = event.getSender().getId();
             final Date timestamp = event.getTimestamp();
 
-            logger.info("Received echo for message '{}' that has been sent to recipient '{}' by sender '{}' at '{}'",
+            logger.info("Received echo for message '{}' that has been sent to recipient '{}' by service '{}' at '{}'",
                     messageId, recipientId, senderId, timestamp);
         };
     }

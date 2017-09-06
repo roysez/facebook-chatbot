@@ -1,4 +1,4 @@
-package me.roysez.dev.sender;
+package me.roysez.dev.service;
 
 
 import com.github.messenger4j.exceptions.MessengerApiException;
