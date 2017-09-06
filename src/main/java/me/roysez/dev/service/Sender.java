@@ -124,13 +124,13 @@ public class Sender {
 
     public void sendQuickReply(String recipientId,MessengerSendClient sendClient) throws MessengerApiException, MessengerIOException {
         final List<QuickReply> quickReplies = QuickReply.newListBuilder()
-                .addTextQuickReply("Action", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION").toList()
-                .addTextQuickReply("Comedy", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY").toList()
-                .addTextQuickReply("Drama", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA").toList()
+                .addTextQuickReply("First", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION").toList()
+                .addTextQuickReply("Secnd", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY").toList()
+                .addTextQuickReply("Third", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA").toList()
                 .addLocationQuickReply().toList()
                 .build();
 
-        sendClient.sendTextMessage(recipientId, "What's your favorite movie genre?", quickReplies);
+        sendClient.sendTextMessage(recipientId, "Тестим quick replies", quickReplies);
     }
 
     public void sendReadReceipt(String recipientId,MessengerSendClient sendClient) throws MessengerApiException, MessengerIOException {

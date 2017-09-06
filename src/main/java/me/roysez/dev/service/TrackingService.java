@@ -20,6 +20,8 @@ public class TrackingService {
 
     private final String apiKey;
 
+    private RestTemplate restTemplate;
+
     @Autowired
     public TrackingService(@Value("${novaposhta.apiKey}") final String apiKey) {
         this.apiKey = apiKey;
@@ -27,14 +29,14 @@ public class TrackingService {
 
     public String track() throws IOException {
 
-        RestTemplate restTemplate = new RestTemplate();
+        restTemplate = new RestTemplate();
 
         JSONObject request = new JSONObject();
 
         ArrayList<Document> documents = new ArrayList<>();
         documents.add(new Document("20400048799000",""));
 
-        request.put("apiKey", "45aaf1229b9ca168248bda85dc329b44");
+        request.put("apiKey", apiKey);
         request.put("modelName", "TrackingDocument");
         request.put("calledMethod", "getStatusDocuments");
         request.put("methodProperties",new JSONObject().put("Documents",documents));
@@ -48,7 +50,7 @@ public class TrackingService {
 
         HttpEntity<String> entity = new HttpEntity<String>(requestString, headers);
 
-        // send request and parse result
+
         ResponseEntity<String> loginResponse = restTemplate
                 .exchange("https://api.novaposhta.ua/v2.0/json/", HttpMethod.POST, entity, String.class);
 
