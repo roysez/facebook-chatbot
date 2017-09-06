@@ -28,10 +28,12 @@ import com.github.messenger4j.send.MessengerSendClient;
 import com.github.messenger4j.send.buttons.Button;
 import com.github.messenger4j.send.templates.ButtonTemplate;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
 import me.roysez.dev.service.Sender;
+import me.roysez.dev.service.TrackingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +63,9 @@ public class MessengerPlatformCallbackHandler {
 
     private final MessengerReceiveClient receiveClient;
     private final MessengerSendClient sendClient;
+
     private final Sender sender;
+    private final TrackingService trackingService;
     /**
      * Constructs the {@code MessengerPlatformCallbackHandler} and initializes the {@code MessengerReceiveClient}.
      *
@@ -73,7 +77,7 @@ public class MessengerPlatformCallbackHandler {
     @Autowired
     public MessengerPlatformCallbackHandler(@Value("${messenger4j.appSecret}") final String appSecret,
                                             @Value("${messenger4j.verifyToken}") final String verifyToken,
-                                            final MessengerSendClient sendClient,Sender sender) {
+                                            final MessengerSendClient sendClient,Sender sender,TrackingService trackingService) {
 
         logger.debug("Initializing MessengerReceiveClient - appSecret: {} | verifyToken: {}", appSecret, verifyToken);
         this.receiveClient = MessengerPlatform.newReceiveClientBuilder(appSecret, verifyToken)
@@ -90,6 +94,7 @@ public class MessengerPlatformCallbackHandler {
                 .build();
         this.sendClient = sendClient;
         this.sender = sender;
+        this.trackingService = trackingService;
     }
 
     /**
@@ -254,16 +259,9 @@ public class MessengerPlatformCallbackHandler {
 
             if(quickReplyPayload.equals("GET_STATUS_DELIVERY_FORM_PAYLOAD")){
 
-                final List<Button> buttons = Button.newListBuilder()
-                        .addUrlButton("Підтвердити запит", "https://www.oculus.com/en-us/rift/").toList()
-                        .build();
-
-                final ButtonTemplate buttonTemplate = ButtonTemplate.newBuilder("Введіть номер накладної та підтвердіть запит", buttons).build();
                 try {
-                    this.sendClient.sendTemplate(senderId, buttonTemplate);
-                } catch (MessengerApiException e) {
-                    e.printStackTrace();
-                } catch (MessengerIOException e) {
+                    sender.sendTextMessage(senderId, this.trackingService.track(),this.sendClient);
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             } else
@@ -279,6 +277,7 @@ public class MessengerPlatformCallbackHandler {
             final String recipientId = event.getRecipient().getId();
             final String payload = event.getPayload();
             final Date timestamp = event.getTimestamp();
+
 
             logger.info("Received postback for user '{}' and page '{}' with payload '{}' at '{}'",
                     senderId, recipientId, payload, timestamp);
