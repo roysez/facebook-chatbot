@@ -56,6 +56,6 @@ public class TrackingService {
         ObjectNode node = mapper.readValue(loginResponse.getBody(), ObjectNode.class);
 
         DocumentTracking documentTracking = mapper.readValue(node.get("data").get(0).toString(),DocumentTracking.class);
-        return documentTracking.toString();
+        return documentTracking.getStatus();
     }
 }
