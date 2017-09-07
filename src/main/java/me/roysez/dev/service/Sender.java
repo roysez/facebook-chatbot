@@ -124,13 +124,13 @@ public class Sender {
 
     public void sendQuickReply(String recipientId,MessengerSendClient sendClient) throws MessengerApiException, MessengerIOException {
         final List<QuickReply> quickReplies = QuickReply.newListBuilder()
-                .addTextQuickReply("First", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION").toList()
-                .addTextQuickReply("Secnd", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY").toList()
-                .addTextQuickReply("Third", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA").toList()
+                .addTextQuickReply("Action", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION").toList()
+                .addTextQuickReply("Comedy", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY").toList()
+                .addTextQuickReply("Drama", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA").toList()
                 .addLocationQuickReply().toList()
                 .build();
 
-        sendClient.sendTextMessage(recipientId, "Тестим quick replies", quickReplies);
+        sendClient.sendTextMessage(recipientId, "What's your favorite movie genre?", quickReplies);
     }
 
     public void sendReadReceipt(String recipientId,MessengerSendClient sendClient) throws MessengerApiException, MessengerIOException {
@@ -164,26 +164,13 @@ public class Sender {
             final Recipient recipient = Recipient.newBuilder().recipientId(recipientId).build();
             final NotificationType notificationType = NotificationType.REGULAR;
             final String metadata = "DEVELOPER_DEFINED_METADATA";
-            sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
+
             sendClient.sendTextMessage(recipient, notificationType, text, metadata);
-            sendClient.sendSenderAction(recipientId, SenderAction.TYPING_OFF);
         } catch (MessengerApiException | MessengerIOException e) {
             handleSendException(e);
         }
     }
 
-    public void sendTextMessage(String recipientId, String text,MessengerSendClient sendClient,String userMetadata) {
-        try {
-            final Recipient recipient = Recipient.newBuilder().recipientId(recipientId).build();
-            final NotificationType notificationType = NotificationType.REGULAR;
-            final String metadata = userMetadata;
-            sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
-            sendClient.sendTextMessage(recipient, notificationType, text, metadata);
-            sendClient.sendSenderAction(recipientId, SenderAction.TYPING_OFF);
-        } catch (MessengerApiException | MessengerIOException e) {
-            handleSendException(e);
-        }
-    }
     public void handleSendException(Exception e) {
         logger.error("Message could not be sent. An unexpected error occurred.", e);
     }

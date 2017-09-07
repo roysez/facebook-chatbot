@@ -27,14 +27,14 @@ public class TrackingService {
         this.apiKey = apiKey;
     }
 
-    public String track(String documentNumber) throws IOException {
+    public String track() throws IOException {
 
         restTemplate = new RestTemplate();
 
         JSONObject request = new JSONObject();
 
         ArrayList<Document> documents = new ArrayList<>();
-        documents.add(new Document(documentNumber,""));
+        documents.add(new Document("20400048799000",""));
 
         request.put("apiKey", apiKey);
         request.put("modelName", "TrackingDocument");
@@ -42,8 +42,7 @@ public class TrackingService {
         request.put("methodProperties",new JSONObject().put("Documents",documents));
 
 
-        String requestString = request.toString()
-                .replace("phone","Phone").replace("documentNumber","DocumentNumber");
+        String requestString = request.toString().replace("phone","Phone").replace("documentNumber","DocumentNumber");
         System.out.println(requestString);
 
         HttpHeaders headers = new HttpHeaders();
@@ -51,7 +50,7 @@ public class TrackingService {
 
         HttpEntity<String> entity = new HttpEntity<String>(requestString, headers);
 
-
+        // send request and parse result
         ResponseEntity<String> loginResponse = restTemplate
                 .exchange("https://api.novaposhta.ua/v2.0/json/", HttpMethod.POST, entity, String.class);
 

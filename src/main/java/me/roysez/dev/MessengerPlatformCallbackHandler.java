@@ -63,7 +63,6 @@ public class MessengerPlatformCallbackHandler {
 
     private final MessengerReceiveClient receiveClient;
     private final MessengerSendClient sendClient;
-
     private final Sender sender;
     private final TrackingService trackingService;
     /**
@@ -77,7 +76,7 @@ public class MessengerPlatformCallbackHandler {
     @Autowired
     public MessengerPlatformCallbackHandler(@Value("${messenger4j.appSecret}") final String appSecret,
                                             @Value("${messenger4j.verifyToken}") final String verifyToken,
-                                            final MessengerSendClient sendClient,Sender sender,TrackingService trackingService) {
+                                            final MessengerSendClient sendClient,Sender sender,final TrackingService trackingService) {
 
         logger.debug("Initializing MessengerReceiveClient - appSecret: {} | verifyToken: {}", appSecret, verifyToken);
         this.receiveClient = MessengerPlatform.newReceiveClientBuilder(appSecret, verifyToken)
@@ -149,66 +148,63 @@ public class MessengerPlatformCallbackHandler {
                     messageId, messageText, senderId, timestamp);
 
             try {
-                    switch (messageText.toLowerCase()) {
-                        case "image":
-                            sender.sendImageMessage(senderId, this.sendClient);
-                            break;
+                switch (messageText.toLowerCase()) {
+                    case "image":
+                        sender.sendImageMessage(senderId,this.sendClient);
+                        break;
 
-                        case "gif":
-                            sender.sendGifMessage(senderId, this.sendClient);
-                            break;
+                    case "gif":
+                        sender.sendGifMessage(senderId,this.sendClient);
+                        break;
 
-                        case "audio":
-                            sender.sendAudioMessage(senderId, this.sendClient);
-                            break;
+                    case "audio":
+                        sender.sendAudioMessage(senderId,this.sendClient);
+                        break;
 
-                        case "video":
-                            sender.sendVideoMessage(senderId, this.sendClient);
-                            break;
+                    case "video":
+                        sender.sendVideoMessage(senderId,this.sendClient);
+                        break;
 
-                        case "file":
-                            sender.sendFileMessage(senderId, this.sendClient);
-                            break;
+                    case "file":
+                        sender.sendFileMessage(senderId,this.sendClient);
+                        break;
 
-                        case "button":
-                            sender.sendButtonMessage(senderId, this.sendClient);
-                            break;
+                    case "button":
+                        sender.sendButtonMessage(senderId,this.sendClient);
+                        break;
 
-                        case "generic":
-                            sender.sendGenericMessage(senderId, this.sendClient);
-                            break;
+                    case "generic":
+                        sender.sendGenericMessage(senderId,this.sendClient);
+                        break;
 
-                        case "receipt":
-                            sender.sendReceiptMessage(senderId, this.sendClient);
-                            break;
+                    case "receipt":
+                        sender.sendReceiptMessage(senderId,this.sendClient);
+                        break;
 
-                        case "quick reply":
-                            sender.sendQuickReply(senderId, this.sendClient);
-                            break;
+                    case "quick reply":
+                        sender.sendQuickReply(senderId,this.sendClient);
+                        break;
 
-                        case "read receipt":
-                            sender.sendReadReceipt(senderId, this.sendClient);
-                            break;
+                    case "read receipt":
+                        sender.sendReadReceipt(senderId,this.sendClient);
+                        break;
 
-                        case "typing on":
-                            sender.sendTypingOn(senderId, this.sendClient);
-                            break;
+                    case "typing on":
+                        sender.sendTypingOn(senderId,this.sendClient);
+                        break;
 
-                        case "typing off":
-                            sender.sendTypingOff(senderId, this.sendClient);
-                            break;
+                    case "typing off":
+                        sender.sendTypingOff(senderId,this.sendClient);
+                        break;
 
 
-                        case "account linking":
-                            sender.sendAccountLinking(senderId, this.sendClient);
-                            break;
+                    case "account linking":
+                        sender.sendAccountLinking(senderId,this.sendClient);
+                        break;
 
-                        case "testmetadata":
-                            sender.sendTextMessage(senderId,"Testing metdata",this.sendClient,"TEST_METADATA");
-                            break;
-                        default:
-                            sender.sendTextMessage(senderId, messageText, this.sendClient);
 
+                    default:
+                        sender.sendTextMessage(senderId, messageText,this.sendClient);
                 }
             } catch (MessengerApiException | MessengerIOException e) {
                 sender.handleSendException(e);
@@ -262,8 +258,11 @@ public class MessengerPlatformCallbackHandler {
 
             if(quickReplyPayload.equals("GET_STATUS_DELIVERY_FORM_PAYLOAD")){
 
-                    sender.sendTextMessage(senderId, "Надішліть номер накладної",this.sendClient);
-
+                try {
+                    sender.sendTextMessage(senderId, trackingService.track(),this.sendClient);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } else
             sender.sendTextMessage(senderId, "Quick reply tapped",this.sendClient);
         };
@@ -323,8 +322,7 @@ public class MessengerPlatformCallbackHandler {
             final String recipientId = event.getRecipient().getId();
             final String senderId = event.getSender().getId();
             final Date timestamp = event.getTimestamp();
-            if(event.getMetadata().equals("TEST_METADATA"))
-                sender.sendTextMessage(senderId,"Metdadata tested",sendClient);
+
             logger.info("Received echo for message '{}' that has been sent to recipient '{}' by service '{}' at '{}'",
                     messageId, recipientId, senderId, timestamp);
         };
