@@ -264,12 +264,9 @@ public class MessengerPlatformCallbackHandler {
             logger.info("Received quick reply for message '{}' with payload '{}'", messageId, quickReplyPayload);
 
             if(quickReplyPayload.equals("GET_STATUS_DELIVERY_FORM_PAYLOAD")){
+                
+                    sender.sendTextMessage(senderId, "Надішліть номер накладної",this.sendClient);
 
-                try {
-                    sender.sendTextMessage(senderId, this.trackingService.track("59000276536092"),this.sendClient);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             } else
             sender.sendTextMessage(senderId, "Quick reply tapped",this.sendClient);
         };
