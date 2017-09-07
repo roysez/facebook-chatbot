@@ -27,14 +27,14 @@ public class TrackingService {
         this.apiKey = apiKey;
     }
 
-    public String track() throws IOException {
+    public String track(String documentNumber) throws IOException {
 
         restTemplate = new RestTemplate();
 
         JSONObject request = new JSONObject();
 
         ArrayList<Document> documents = new ArrayList<>();
-        documents.add(new Document("20400048799000",""));
+        documents.add(new Document(documentNumber,""));
 
         request.put("apiKey", apiKey);
         request.put("modelName", "TrackingDocument");
@@ -42,7 +42,8 @@ public class TrackingService {
         request.put("methodProperties",new JSONObject().put("Documents",documents));
 
 
-        String requestString = request.toString().replace("phone","Phone").replace("documentNumber","DocumentNumber");
+        String requestString = request.toString()
+                .replace("phone","Phone").replace("documentNumber","DocumentNumber");
         System.out.println(requestString);
 
         HttpHeaders headers = new HttpHeaders();

@@ -164,13 +164,26 @@ public class Sender {
             final Recipient recipient = Recipient.newBuilder().recipientId(recipientId).build();
             final NotificationType notificationType = NotificationType.REGULAR;
             final String metadata = "DEVELOPER_DEFINED_METADATA";
-
+            sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
             sendClient.sendTextMessage(recipient, notificationType, text, metadata);
+            sendClient.sendSenderAction(recipientId, SenderAction.TYPING_OFF);
         } catch (MessengerApiException | MessengerIOException e) {
             handleSendException(e);
         }
     }
 
+    public void sendTextMessage(String recipientId, String text,MessengerSendClient sendClient,String userMetadata) {
+        try {
+            final Recipient recipient = Recipient.newBuilder().recipientId(recipientId).build();
+            final NotificationType notificationType = NotificationType.REGULAR;
+            final String metadata = userMetadata;
+            sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
+            sendClient.sendTextMessage(recipient, notificationType, text, metadata);
+            sendClient.sendSenderAction(recipientId, SenderAction.TYPING_OFF);
+        } catch (MessengerApiException | MessengerIOException e) {
+            handleSendException(e);
+        }
+    }
     public void handleSendException(Exception e) {
         logger.error("Message could not be sent. An unexpected error occurred.", e);
     }
