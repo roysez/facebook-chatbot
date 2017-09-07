@@ -323,9 +323,9 @@ public class MessengerPlatformCallbackHandler {
             final String recipientId = event.getRecipient().getId();
             final String senderId = event.getSender().getId();
             final Date timestamp = event.getTimestamp();
-            //if(event.getMetadata()!=null && event.getMetadata().equals("DEVELOPER_DEFINED_METADATA")){
+            if(event.getMetadata()!=null && event.getMetadata().equals("DEVELOPER_DEFINED_METADATA")){
                 sender.sendTextMessage(recipientId,"tested!",sendClient,"");
-            //}
+            }
             logger.info("Received echo for message '{}' that has been sent to recipient '{}' by service '{}' at '{}'",
                     messageId, recipientId, senderId, timestamp);
         };
