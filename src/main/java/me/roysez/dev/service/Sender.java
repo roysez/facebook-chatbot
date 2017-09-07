@@ -159,13 +159,15 @@ public class Sender {
     }
 
     // Default
-    public void sendTextMessage(String recipientId, String text,MessengerSendClient sendClient) {
+    public void sendTextMessage(String recipientId, String text,MessengerSendClient sendClient,String userMetadata) {
         try {
             final Recipient recipient = Recipient.newBuilder().recipientId(recipientId).build();
             final NotificationType notificationType = NotificationType.REGULAR;
             final String metadata = "DEVELOPER_DEFINED_METADATA";
-
-            sendClient.sendTextMessage(recipient, notificationType, text, metadata);
+            if(userMetadata.isEmpty()) {
+                sendClient.sendTextMessage(recipient, notificationType, text);
+            } else
+                sendClient.sendTextMessage(recipient, notificationType, text, metadata);
         } catch (MessengerApiException | MessengerIOException e) {
             handleSendException(e);
         }

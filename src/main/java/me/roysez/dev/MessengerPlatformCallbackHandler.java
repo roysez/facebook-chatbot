@@ -143,7 +143,7 @@ public class MessengerPlatformCallbackHandler {
             final String messageText = event.getText();
             final String senderId = event.getSender().getId();
             final Date timestamp = event.getTimestamp();
-
+            final String recipientId = event.getRecipient().getId();
             logger.info("Received message '{}' with text '{}' from user '{}' at '{}'",
                     messageId, messageText, senderId, timestamp);
 
@@ -201,10 +201,11 @@ public class MessengerPlatformCallbackHandler {
                     case "account linking":
                         sender.sendAccountLinking(senderId,this.sendClient);
                         break;
-
-
+                    case "testmetadata":
+                        sender.sendTextMessage(recipientId,"Testing",this.sendClient,"metadata");
+                        break;
                     default:
-                        sender.sendTextMessage(senderId, messageText,this.sendClient);
+                        sender.sendTextMessage(recipientId, messageText,this.sendClient,"");
                 }
             } catch (MessengerApiException | MessengerIOException e) {
                 sender.handleSendException(e);
@@ -241,7 +242,7 @@ public class MessengerPlatformCallbackHandler {
                 logger.info("Attachment of type '{}' with payload '{}'", attachmentType, payloadAsString);
             });
 
-            sender.sendTextMessage(senderId, "Message with attachment received",this.sendClient);
+            sender.sendTextMessage(senderId, "Message with attachment received",this.sendClient,"");
         };
     }
 
@@ -259,12 +260,12 @@ public class MessengerPlatformCallbackHandler {
             if(quickReplyPayload.equals("GET_STATUS_DELIVERY_FORM_PAYLOAD")){
 
                 try {
-                    sender.sendTextMessage(senderId, trackingService.track(),this.sendClient);
+                    sender.sendTextMessage(senderId, trackingService.track(),this.sendClient,"");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             } else
-            sender.sendTextMessage(senderId, "Quick reply tapped",this.sendClient);
+            sender.sendTextMessage(senderId, "Quick reply tapped",this.sendClient,"");
         };
     }
 
@@ -281,7 +282,7 @@ public class MessengerPlatformCallbackHandler {
             logger.info("Received postback for user '{}' and page '{}' with payload '{}' at '{}'",
                     senderId, recipientId, payload, timestamp);
 
-            sender.sendTextMessage(senderId, "Postback called",this.sendClient);
+            sender.sendTextMessage(senderId, "Postback called",this.sendClient,"");
         };
     }
 
@@ -310,7 +311,7 @@ public class MessengerPlatformCallbackHandler {
             logger.info("Received authentication for user '{}' and page '{}' with pass through param '{}' at '{}'",
                     senderId, recipientId, passThroughParam, timestamp);
 
-            sender.sendTextMessage(senderId, "Authentication successful",this.sendClient);
+            sender.sendTextMessage(senderId, "Authentication successful",this.sendClient,"");
         };
     }
 
@@ -322,7 +323,9 @@ public class MessengerPlatformCallbackHandler {
             final String recipientId = event.getRecipient().getId();
             final String senderId = event.getSender().getId();
             final Date timestamp = event.getTimestamp();
-
+            if(event.getMetadata()!=null && event.getMetadata().equals("metadata")){
+                sender.sendTextMessage(recipientId,"tested!",sendClient,"");
+            }
             logger.info("Received echo for message '{}' that has been sent to recipient '{}' by service '{}' at '{}'",
                     messageId, recipientId, senderId, timestamp);
         };
