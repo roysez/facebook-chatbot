@@ -164,7 +164,7 @@ public class Sender {
             final Recipient recipient = Recipient.newBuilder().recipientId(recipientId).build();
             final NotificationType notificationType = NotificationType.REGULAR;
             final String metadata = "DEVELOPER_DEFINED_METADATA";
-            if(userMetadata.isEmpty()) {
+            if(userMetadata.intern().equals("")) {
                 sendClient.sendTextMessage(recipient, notificationType, text);
             } else
                 sendClient.sendTextMessage(recipient, notificationType, text, metadata);
