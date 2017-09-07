@@ -149,9 +149,6 @@ public class MessengerPlatformCallbackHandler {
                     messageId, messageText, senderId, timestamp);
 
             try {
-                if(messageText.matches("\\d+"))
-                    sender.sendTextMessage(senderId,trackingService.track(messageText),this.sendClient);
-                else {
                     switch (messageText.toLowerCase()) {
                         case "image":
                             sender.sendImageMessage(senderId, this.sendClient);
@@ -211,12 +208,10 @@ public class MessengerPlatformCallbackHandler {
                             break;
                         default:
                             sender.sendTextMessage(senderId, messageText, this.sendClient);
-                    }
+
                 }
             } catch (MessengerApiException | MessengerIOException e) {
                 sender.handleSendException(e);
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         };
     }
