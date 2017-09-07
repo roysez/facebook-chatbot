@@ -206,7 +206,9 @@ public class MessengerPlatformCallbackHandler {
                             sender.sendAccountLinking(senderId, this.sendClient);
                             break;
 
-
+                        case "testmetadata":
+                            sender.sendTextMessage(senderId,"Testing metdata",this.sendClient,"TEST_METADATA");
+                            break;
                         default:
                             sender.sendTextMessage(senderId, messageText, this.sendClient);
                     }
@@ -264,7 +266,7 @@ public class MessengerPlatformCallbackHandler {
             logger.info("Received quick reply for message '{}' with payload '{}'", messageId, quickReplyPayload);
 
             if(quickReplyPayload.equals("GET_STATUS_DELIVERY_FORM_PAYLOAD")){
-                
+
                     sender.sendTextMessage(senderId, "Надішліть номер накладної",this.sendClient);
 
             } else
@@ -326,7 +328,8 @@ public class MessengerPlatformCallbackHandler {
             final String recipientId = event.getRecipient().getId();
             final String senderId = event.getSender().getId();
             final Date timestamp = event.getTimestamp();
-
+            if(event.getMetadata().equals("TEST_METADATA"))
+                sender.sendTextMessage(senderId,"Metdadata tested",sendClient);
             logger.info("Received echo for message '{}' that has been sent to recipient '{}' by service '{}' at '{}'",
                     messageId, recipientId, senderId, timestamp);
         };

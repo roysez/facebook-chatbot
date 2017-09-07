@@ -42,7 +42,8 @@ public class TrackingService {
         request.put("methodProperties",new JSONObject().put("Documents",documents));
 
 
-        String requestString = request.toString().replace("phone","Phone").replace("documentNumber","DocumentNumber");
+        String requestString = request.toString()
+                .replace("phone","Phone").replace("documentNumber","DocumentNumber");
         System.out.println(requestString);
 
         HttpHeaders headers = new HttpHeaders();
