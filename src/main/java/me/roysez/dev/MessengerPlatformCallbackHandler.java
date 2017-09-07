@@ -56,16 +56,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/callback")
 public class MessengerPlatformCallbackHandler {
 
-    private static final String RESOURCE_URL =
-            "https://raw.githubusercontent.com/fbsamples/messenger-platform-samples/master/node/public";
 
     private static final Logger logger = LoggerFactory.getLogger(MessengerPlatformCallbackHandler.class);
 
     private final MessengerReceiveClient receiveClient;
     private final MessengerSendClient sendClient;
-
     private final Sender sender;
-    private final TrackingService trackingService;
+
     /**
      * Constructs the {@code MessengerPlatformCallbackHandler} and initializes the {@code MessengerReceiveClient}.
      *
@@ -77,7 +74,7 @@ public class MessengerPlatformCallbackHandler {
     @Autowired
     public MessengerPlatformCallbackHandler(@Value("${messenger4j.appSecret}") final String appSecret,
                                             @Value("${messenger4j.verifyToken}") final String verifyToken,
-                                            final MessengerSendClient sendClient,Sender sender,TrackingService trackingService) {
+                                            final MessengerSendClient sendClient,Sender sender) {
 
         logger.debug("Initializing MessengerReceiveClient - appSecret: {} | verifyToken: {}", appSecret, verifyToken);
         this.receiveClient = MessengerPlatform.newReceiveClientBuilder(appSecret, verifyToken)
@@ -94,7 +91,6 @@ public class MessengerPlatformCallbackHandler {
                 .build();
         this.sendClient = sendClient;
         this.sender = sender;
-        this.trackingService = trackingService;
     }
 
     /**
@@ -149,74 +145,19 @@ public class MessengerPlatformCallbackHandler {
                     messageId, messageText, senderId, timestamp);
 
             try {
-                if(messageText.matches("\\d+"))
-                    sender.sendTextMessage(senderId,trackingService.track(messageText),this.sendClient);
-                else {
-                    switch (messageText.toLowerCase()) {
-                        case "image":
-                            sender.sendImageMessage(senderId, this.sendClient);
-                            break;
+                switch (messageText.toLowerCase()) {
 
-                        case "gif":
-                            sender.sendGifMessage(senderId, this.sendClient);
-                            break;
-
-                        case "audio":
-                            sender.sendAudioMessage(senderId, this.sendClient);
-                            break;
-
-                        case "video":
-                            sender.sendVideoMessage(senderId, this.sendClient);
-                            break;
-
-                        case "file":
-                            sender.sendFileMessage(senderId, this.sendClient);
-                            break;
-
-                        case "button":
-                            sender.sendButtonMessage(senderId, this.sendClient);
-                            break;
-
-                        case "generic":
-                            sender.sendGenericMessage(senderId, this.sendClient);
-                            break;
-
-                        case "receipt":
-                            sender.sendReceiptMessage(senderId, this.sendClient);
-                            break;
-
-                        case "quick reply":
-                            sender.sendQuickReply(senderId, this.sendClient);
-                            break;
-
-                        case "read receipt":
-                            sender.sendReadReceipt(senderId, this.sendClient);
-                            break;
-
-                        case "typing on":
-                            sender.sendTypingOn(senderId, this.sendClient);
-                            break;
-
-                        case "typing off":
-                            sender.sendTypingOff(senderId, this.sendClient);
-                            break;
-
-
-                        case "account linking":
-                            sender.sendAccountLinking(senderId, this.sendClient);
-                            break;
-
-                        case "testmetadata":
-                            sender.sendTextMessage(senderId,"Testing metdata",this.sendClient,"TEST_METADATA");
-                            break;
-                        default:
-                            sender.sendTextMessage(senderId, messageText, this.sendClient);
-                    }
+                    case "get started":
+                        sender.handleGetStarted(senderId,this.sendClient);
+                        break;
+                    default:
+                        if(messageText.toLowerCase().matches("^[0-9]{10,14}$")){
+                            sender.trackingDelivery(senderId,this.sendClient,messageText);
+                        } else
+                            sender.sendTextMessage(senderId, messageText,this.sendClient);
                 }
             } catch (MessengerApiException | MessengerIOException e) {
                 sender.handleSendException(e);
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         };
     }
@@ -238,7 +179,6 @@ public class MessengerPlatformCallbackHandler {
             attachments.forEach(attachment -> {
                 final AttachmentType attachmentType = attachment.getType();
                 final Payload payload = attachment.getPayload();
-
                 String payloadAsString = null;
                 if (payload.isBinaryPayload()) {
                     payloadAsString = payload.asBinaryPayload().getUrl();
@@ -246,7 +186,6 @@ public class MessengerPlatformCallbackHandler {
                 if (payload.isLocationPayload()) {
                     payloadAsString = payload.asLocationPayload().getCoordinates().toString();
                 }
-
                 logger.info("Attachment of type '{}' with payload '{}'", attachmentType, payloadAsString);
             });
 
@@ -267,8 +206,7 @@ public class MessengerPlatformCallbackHandler {
 
             if(quickReplyPayload.equals("GET_STATUS_DELIVERY_FORM_PAYLOAD")){
 
-                    sender.sendTextMessage(senderId, "Надішліть номер накладної",this.sendClient);
-
+                sender.sendTextMessage(senderId,"Введіть номер накладної",this.sendClient);
             } else
             sender.sendTextMessage(senderId, "Quick reply tapped",this.sendClient);
         };
@@ -328,8 +266,7 @@ public class MessengerPlatformCallbackHandler {
             final String recipientId = event.getRecipient().getId();
             final String senderId = event.getSender().getId();
             final Date timestamp = event.getTimestamp();
-            if(event.getMetadata().equals("TEST_METADATA"))
-                sender.sendTextMessage(senderId,"Metdadata tested",sendClient);
+
             logger.info("Received echo for message '{}' that has been sent to recipient '{}' by service '{}' at '{}'",
                     messageId, recipientId, senderId, timestamp);
         };
