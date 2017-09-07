@@ -202,10 +202,10 @@ public class MessengerPlatformCallbackHandler {
                         sender.sendAccountLinking(senderId,this.sendClient);
                         break;
                     case "testmetadata":
-                        sender.sendTextMessage(recipientId,"Testing",this.sendClient,"metadata");
+                        sender.sendTextMessage(senderId,"Testing",this.sendClient,"metadata");
                         break;
                     default:
-                        sender.sendTextMessage(recipientId, messageText,this.sendClient,"");
+                        sender.sendTextMessage(senderId, messageText,this.sendClient,"");
                 }
             } catch (MessengerApiException | MessengerIOException e) {
                 sender.handleSendException(e);
@@ -324,7 +324,7 @@ public class MessengerPlatformCallbackHandler {
             final String senderId = event.getSender().getId();
             final Date timestamp = event.getTimestamp();
             if(event.getMetadata()!=null && event.getMetadata().equals("metadata")){
-                sender.sendTextMessage(recipientId,"tested!",sendClient,"");
+                sender.sendTextMessage(senderId,"tested!",sendClient,"");
             }
             logger.info("Received echo for message '{}' that has been sent to recipient '{}' by service '{}' at '{}'",
                     messageId, recipientId, senderId, timestamp);
