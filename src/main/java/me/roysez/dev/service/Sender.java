@@ -153,6 +153,7 @@ public class Sender {
                 .addLocationQuickReply().toList()
                 .build();
 
+
         sendClient.sendTextMessage(recipientId, "Вітаємо новго користувача нашого сервісу, \n" +
                 " дізнавайтесь статус ваших відправлень" +
                 " Нової Пошти — просто надішліть номер накладної і отримайте всю потрібну інформацію.", quickReplies);

@@ -233,7 +233,6 @@ public class MessengerPlatformCallbackHandler {
             attachments.forEach(attachment -> {
                 final AttachmentType attachmentType = attachment.getType();
                 final Payload payload = attachment.getPayload();
-
                 String payloadAsString = null;
                 if (payload.isBinaryPayload()) {
                     payloadAsString = payload.asBinaryPayload().getUrl();
@@ -241,7 +240,6 @@ public class MessengerPlatformCallbackHandler {
                 if (payload.isLocationPayload()) {
                     payloadAsString = payload.asLocationPayload().getCoordinates().toString();
                 }
-
                 logger.info("Attachment of type '{}' with payload '{}'", attachmentType, payloadAsString);
             });
 

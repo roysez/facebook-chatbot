@@ -62,7 +62,7 @@ public class TrackingService {
 
             documentTracking = mapper.readValue(node.get("data").get(0).toString(), DocumentTracking.class);
             return documentTracking.getStatus();
-        } catch (IOException e){
+        } catch (Exception e){
             e.printStackTrace();
             return "Перевірте введені дані";
         }
