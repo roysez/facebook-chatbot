@@ -2,9 +2,12 @@ package me.roysez.dev.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import me.roysez.dev.MessengerPlatformCallbackHandler;
 import me.roysez.dev.domain.Document;
 import me.roysez.dev.domain.DocumentTracking;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -18,6 +21,7 @@ import java.util.Optional;
 @Service
 public class TrackingService {
 
+    private static final Logger logger = LoggerFactory.getLogger(MessengerPlatformCallbackHandler.class);
 
     private final String apiKey;
 
@@ -28,7 +32,7 @@ public class TrackingService {
         this.apiKey = apiKey;
     }
 
-    public String track(String documentNumber)  {
+    public String track(String documentNumber) throws IOException {
 
         restTemplate = new RestTemplate();
 
@@ -43,8 +47,12 @@ public class TrackingService {
         request.put("methodProperties",new JSONObject().put("Documents",documents));
 
 
-        String requestString = request.toString().replace("phone","Phone").replace("documentNumber","DocumentNumber");
-        System.out.println(requestString);
+
+        String requestString = request.toString().replace("phone","Phone")
+                .replace("documentNumber","DocumentNumber"); //fixing problem of novaposhta api with camelCase
+
+
+        logger.info("Request String for document tracking \n {}",requestString);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -57,14 +65,12 @@ public class TrackingService {
 
         ObjectMapper mapper = new ObjectMapper();
         DocumentTracking documentTracking;
-        try {
-            ObjectNode node = mapper.readValue(loginResponse.getBody(), ObjectNode.class);
 
+            ObjectNode node = mapper.readValue(loginResponse.getBody(), ObjectNode.class);
             documentTracking = mapper.readValue(node.get("data").get(0).toString(), DocumentTracking.class);
+
+            logger.info("Response status for document tracking \n {}",node.get("Status"));
+
             return documentTracking.getStatus();
-        } catch (Exception e){
-            e.printStackTrace();
-            return "Перевірте введені дані";
-        }
     }
 }

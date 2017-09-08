@@ -11,6 +11,7 @@ import com.github.messenger4j.send.templates.ReceiptTemplate;
 import me.roysez.dev.MessengerPlatformCallbackHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,11 +20,57 @@ import java.util.List;
 public class Sender {
 
 
+    private final TrackingService trackingService;
+
+    @Autowired
+    public Sender(TrackingService trackingService){
+        this.trackingService = trackingService;
+    }
+
+
     private static final String RESOURCE_URL =
             "https://raw.githubusercontent.com/fbsamples/messenger-platform-samples/master/node/public";
 
     private static final Logger logger = LoggerFactory.getLogger(MessengerPlatformCallbackHandler.class);
 
+
+    public void handleGetStarted(String recipientId,MessengerSendClient sendClient) throws MessengerApiException, MessengerIOException{
+
+        sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
+        final List<QuickReply> quickReplies = QuickReply.newListBuilder()
+                .addTextQuickReply("Статус доставки", "GET_STATUS_DELIVERY_FORM_PAYLOAD").toList()
+                .addLocationQuickReply().toList()
+                .build();
+
+
+        sendClient.sendTextMessage(recipientId, "Швидко дізнавайтесь статус ваших відправлень Нової Пошти " +
+                "— просто надішліть номер накладної після вибору пункту \'Статус доставки\' " +
+                "і отримайте всю потрібну інформацію.  " +
+                "Щоб знайти найближчі відділення Нової пошти," +
+                " просто надішлість нам вашу локацію" , quickReplies);
+
+        sendClient.sendSenderAction(recipientId, SenderAction.TYPING_OFF);
+    }
+
+    public void trackingDelivery(String recipientId,MessengerSendClient sendClient,String documentNumber) throws MessengerApiException, MessengerIOException{
+        try {
+            String status = trackingService.track(documentNumber);
+            sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
+            sendClient.sendTextMessage(recipientId,status);
+
+        } catch (Exception e){
+            sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
+
+            final List<QuickReply> quickReplies = QuickReply.newListBuilder()
+                    .addTextQuickReply("Повторити спробу", "GET_STATUS_DELIVERY_FORM_PAYLOAD").toList()
+                    .build();
+
+            sendClient.sendTextMessage(recipientId,
+                    "Перевірте правильність введення номера накладної та повторіть спробу", quickReplies);
+
+            sendClient.sendSenderAction(recipientId, SenderAction.TYPING_OFF);
+        }
+    }
 
     public void sendImageMessage(String recipientId,MessengerSendClient sendClient) throws MessengerApiException, MessengerIOException {
         sendClient.sendImageAttachment(recipientId, RESOURCE_URL + "/assets/rift.png");
@@ -147,27 +194,15 @@ public class Sender {
 
     public void sendAccountLinking(String recipientId,MessengerSendClient sendClient) throws MessengerApiException, MessengerIOException {
         // Simulation of account linking
-        final List<QuickReply> quickReplies = QuickReply.newListBuilder()
-                .addTextQuickReply("Статус доставки", "GET_STATUS_DELIVERY_FORM_PAYLOAD").toList()
-                .addTextQuickReply("Замовити курєра", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION").toList()
-                .addLocationQuickReply().toList()
-                .build();
-
-
-        sendClient.sendTextMessage(recipientId, "Вітаємо новго користувача нашого сервісу, \n" +
-                " дізнавайтесь статус ваших відправлень" +
-                " Нової Пошти — просто надішліть номер накладної і отримайте всю потрібну інформацію.", quickReplies);
     }
 
     // Default
-    public void sendTextMessage(String recipientId, String text,MessengerSendClient sendClient,String userMetadata) {
+    public void sendTextMessage(String recipientId, String text,MessengerSendClient sendClient) {
         try {
             final Recipient recipient = Recipient.newBuilder().recipientId(recipientId).build();
             final NotificationType notificationType = NotificationType.REGULAR;
             final String metadata = "DEVELOPER_DEFINED_METADATA";
-            if(userMetadata.intern().equals("")) {
-                sendClient.sendTextMessage(recipient, notificationType, text);
-            } else
+
                 sendClient.sendTextMessage(recipient, notificationType, text, metadata);
         } catch (MessengerApiException | MessengerIOException e) {
             handleSendException(e);
