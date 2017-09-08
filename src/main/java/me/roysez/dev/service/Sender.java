@@ -59,7 +59,17 @@ public class Sender {
         try {
             DocumentTracking documentTracking = trackingService.track(documentNumber);
             sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
-            sendClient.sendTextMessage(recipientId,documentTracking.getStatus());
+            StringBuilder response = new StringBuilder()
+                    .append(EmojiManager.getForAlias("small_airplane").getUnicode()
+                            + " Відправлення з міста: " + documentTracking.getCitySender() + "\n"
+                            + EmojiManager.getForAlias("airplane_arriving").getUnicode()
+                            + " До: " + documentTracking.getCityRecipient() + "\n"
+                            + EmojiManager.getForAlias("timer_clock").getUnicode()
+                            + " Дата та час доставки: " + documentTracking.getRecipientDateTime() + "\n"
+                            + EmojiManager.getForAlias("envelope").getUnicode()
+                            + " Статус: "  + documentTracking.getStatus() + "\n");
+
+            sendClient.sendTextMessage(recipientId,response.toString());
 
         } catch (Exception e){
             e.printStackTrace();
@@ -73,7 +83,8 @@ public class Sender {
                     .build();
 
             sendClient.sendTextMessage(recipientId,
-                    "Перевірте правильність введення номера накладної та повторіть спробу" + EmojiManager.getForAlias("frowning"), quickReplies);
+                    "Перевірте правильність введення номера накладної та повторіть спробу" +
+                            EmojiManager.getForAlias("slightly_frowning").getUnicode(), quickReplies);
 
             sendClient.sendSenderAction(recipientId, SenderAction.TYPING_OFF);
         }
