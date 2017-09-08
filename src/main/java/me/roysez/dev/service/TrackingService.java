@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Optional;
 
 @Service
 public class TrackingService {
@@ -27,14 +28,14 @@ public class TrackingService {
         this.apiKey = apiKey;
     }
 
-    public String track() throws IOException {
+    public String track(String documentNumber)  {
 
         restTemplate = new RestTemplate();
 
         JSONObject request = new JSONObject();
 
         ArrayList<Document> documents = new ArrayList<>();
-        documents.add(new Document("20400048799000",""));
+        documents.add(new Document(documentNumber.isEmpty()?"20400048799000":documentNumber,""));
 
         request.put("apiKey", apiKey);
         request.put("modelName", "TrackingDocument");
@@ -55,9 +56,15 @@ public class TrackingService {
                 .exchange("https://api.novaposhta.ua/v2.0/json/", HttpMethod.POST, entity, String.class);
 
         ObjectMapper mapper = new ObjectMapper();
-        ObjectNode node = mapper.readValue(loginResponse.getBody(), ObjectNode.class);
+        DocumentTracking documentTracking;
+        try {
+            ObjectNode node = mapper.readValue(loginResponse.getBody(), ObjectNode.class);
 
-        DocumentTracking documentTracking = mapper.readValue(node.get("data").get(0).toString(),DocumentTracking.class);
-        return documentTracking.getStatus();
+            documentTracking = mapper.readValue(node.get("data").get(0).toString(), DocumentTracking.class);
+            return documentTracking.getStatus();
+        } catch (IOException e){
+            e.printStackTrace();
+            return "Перевірте введені дані";
+        }
     }
 }
