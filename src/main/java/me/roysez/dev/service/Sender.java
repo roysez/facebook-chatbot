@@ -8,7 +8,10 @@ import com.github.messenger4j.send.buttons.Button;
 import com.github.messenger4j.send.templates.ButtonTemplate;
 import com.github.messenger4j.send.templates.GenericTemplate;
 import com.github.messenger4j.send.templates.ReceiptTemplate;
+import com.vdurmont.emoji.Emoji;
+import com.vdurmont.emoji.EmojiManager;
 import me.roysez.dev.MessengerPlatformCallbackHandler;
+import me.roysez.dev.domain.DocumentTracking;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,11 +57,15 @@ public class Sender {
 
     public void trackingDelivery(String recipientId,MessengerSendClient sendClient,String documentNumber) throws MessengerApiException, MessengerIOException{
         try {
-            String status = trackingService.track(documentNumber);
+            DocumentTracking documentTracking = trackingService.track(documentNumber);
             sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
-            sendClient.sendTextMessage(recipientId,status);
+            sendClient.sendTextMessage(recipientId,documentTracking.getStatus());
 
         } catch (Exception e){
+            e.printStackTrace();
+
+            logger.debug("Fail to track document - {}",documentNumber);
+
             sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
 
             final List<QuickReply> quickReplies = QuickReply.newListBuilder()
@@ -66,7 +73,7 @@ public class Sender {
                     .build();
 
             sendClient.sendTextMessage(recipientId,
-                    "Перевірте правильність введення номера накладної та повторіть спробу", quickReplies);
+                    "Перевірте правильність введення номера накладної та повторіть спробу" + EmojiManager.getForAlias("frowning"), quickReplies);
 
             sendClient.sendSenderAction(recipientId, SenderAction.TYPING_OFF);
         }

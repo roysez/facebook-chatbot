@@ -32,7 +32,7 @@ public class TrackingService {
         this.apiKey = apiKey;
     }
 
-    public String track(String documentNumber) throws IOException {
+    public DocumentTracking track(String documentNumber) throws IOException {
 
         restTemplate = new RestTemplate();
 
@@ -71,6 +71,6 @@ public class TrackingService {
 
             logger.info("Response status for document tracking \n {}",node.get("Status"));
 
-            return documentTracking.getStatus();
+            return documentTracking;
     }
 }
