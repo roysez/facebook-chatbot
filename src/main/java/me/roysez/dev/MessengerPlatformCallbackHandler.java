@@ -151,7 +151,7 @@ public class MessengerPlatformCallbackHandler {
                         sender.handleGetStarted(senderId,this.sendClient);
                         break;
                     default:
-                        if(messageText.toLowerCase().matches("^[0-9]{10,14}$")){
+                        if(messageText.toLowerCase().matches("^[0-9]{1,24}$")){
                             sender.trackingDelivery(senderId,this.sendClient,messageText);
                         } else
                             sender.sendTextMessage(senderId, messageText,this.sendClient);
