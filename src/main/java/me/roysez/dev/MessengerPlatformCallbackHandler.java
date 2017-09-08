@@ -206,9 +206,9 @@ public class MessengerPlatformCallbackHandler {
                         break;
                     default:
                         if(messageText.toLowerCase().matches("^[0-9]{10,14}$")){
-                            trackingService.track(messageText);
-                        }
-                        sender.sendTextMessage(senderId, messageText,this.sendClient,"");
+                            sender.sendTextMessage(senderId,trackingService.track(messageText),this.sendClient,"");
+                        } else
+                            sender.sendTextMessage(senderId, messageText,this.sendClient,"");
                 }
             } catch (MessengerApiException | MessengerIOException e) {
                 sender.handleSendException(e);
@@ -261,7 +261,7 @@ public class MessengerPlatformCallbackHandler {
             logger.info("Received quick reply for message '{}' with payload '{}'", messageId, quickReplyPayload);
 
             if(quickReplyPayload.equals("GET_STATUS_DELIVERY_FORM_PAYLOAD")){
-                
+
                 sender.sendTextMessage(senderId,"Введіть номер накладної",this.sendClient,"");
             } else
             sender.sendTextMessage(senderId, "Quick reply tapped",this.sendClient,"");
