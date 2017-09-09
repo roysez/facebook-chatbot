@@ -79,6 +79,7 @@ public class MessengerPlatformCallbackHandler {
     @Autowired
     public MessengerPlatformCallbackHandler(@Value("${messenger4j.appSecret}") final String appSecret,
                                             @Value("${messenger4j.verifyToken}") final String verifyToken,
+                                            @Value("${messenger4j.pageAccessToken}") final String pageAccessToken,
                                             final MessengerSendClient sendClient,Sender sender,CommandExecutor commandExecutor) {
 
         logger.debug("Initializing MessengerReceiveClient - appSecret: {} | verifyToken: {}", appSecret, verifyToken);
@@ -102,7 +103,7 @@ public class MessengerPlatformCallbackHandler {
                         .type(CallToActionType.POSTBACK)
                         .build());
         try {
-            MessengerPlatform.newSetupClientBuilder(verifyToken).build().setupPersistentMenu(list);
+            MessengerPlatform.newSetupClientBuilder(pageAccessToken).build().setupPersistentMenu(list);
         } catch (MessengerApiException e) {
             e.printStackTrace();
         } catch (MessengerIOException e) {
