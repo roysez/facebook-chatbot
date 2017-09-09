@@ -35,6 +35,7 @@ import java.util.List;
 
 import com.github.messenger4j.setup.CallToAction;
 import com.github.messenger4j.setup.CallToActionType;
+import com.github.messenger4j.setup.MessengerSetupClient;
 import me.roysez.dev.command.CommandExecutor;
 import me.roysez.dev.service.Sender;
 import me.roysez.dev.service.TrackingService;
@@ -95,20 +96,32 @@ public class MessengerPlatformCallbackHandler {
                 .onMessageReadEvent(newMessageReadEventHandler())
                 .fallbackEventHandler(newFallbackEventHandler())
                 .build();
-        List<CallToAction> list = new ArrayList<>();
-        list.add(
+        List<CallToAction> menuButtons = new ArrayList<>();
+        menuButtons.add(
                 CallToAction.newBuilder()
-                        .title("tracking")
-                        .payload("TRACKING")
+                        .title("Меню вибору")
+                        .payload("GET_STARTED_PAYLOAD")
                         .type(CallToActionType.POSTBACK)
                         .build());
         try {
-            MessengerPlatform.newSetupClientBuilder(pageAccessToken).build().setupPersistentMenu(list);
+
+            MessengerSetupClient setupClient = MessengerPlatform.newSetupClientBuilder(pageAccessToken).build();
+            setupClient.setupStartButton("GET_STARTED_PAYLOAD");
+            setupClient.setupPersistentMenu(menuButtons);
+            setupClient.setupWelcomeMessage("Вітаємо нового користувача," +
+                    " швидко дізнавайтесь поточне місце знаходження посилки " +
+                    "та знаходьте найближчі відділення Нової Пошти до вашого місця знаходження " +
+                    " \n Не є офіційним додатком\'Нової пошти\'");
+
+            logger.info("Menu setup - successful ");
         } catch (MessengerApiException e) {
-            e.printStackTrace();
+
+            logger.warn("MENU SETUP: Error with messenger API - {}",e);
         } catch (MessengerIOException e) {
-            e.printStackTrace();
+
+            logger.warn("MENU SETUP: IO exception - {}",e);
         }
+
         this.sendClient = sendClient;
         this.sender = sender;
         this.commandExecutor = commandExecutor;
@@ -245,11 +258,18 @@ public class MessengerPlatformCallbackHandler {
             final String payload = event.getPayload();
             final Date timestamp = event.getTimestamp();
 
+            if(payload.equals("GET_STARTED_PAYLOAD"))
+            {
+                try {
+                    commandExecutor.execute(Operation.GET_STARTED,event,this.sendClient);
+                } catch (MessengerApiException | MessengerIOException e) {
+                    e.printStackTrace();
+                }
+            }
 
             logger.info("Received postback for user '{}' and page '{}' with payload '{}' at '{}'",
                     senderId, recipientId, payload, timestamp);
 
-            sender.sendTextMessage(senderId, "Postback called",this.sendClient);
         };
     }
 
@@ -278,7 +298,7 @@ public class MessengerPlatformCallbackHandler {
             logger.info("Received authentication for user '{}' and page '{}' with pass through param '{}' at '{}'",
                     senderId, recipientId, passThroughParam, timestamp);
 
-            sender.sendTextMessage(senderId, "Authentication successful",this.sendClient);
+            logger.info("Authentication successful");
         };
     }
 
