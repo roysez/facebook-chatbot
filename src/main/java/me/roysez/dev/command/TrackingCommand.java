@@ -18,9 +18,13 @@ import java.util.List;
 @Component
 public class TrackingCommand implements Command {
 
-    @Autowired
-    TrackingService trackingService;
 
+    private TrackingService trackingService;
+
+    @Autowired
+    public TrackingCommand(TrackingService trackingService) {
+        this.trackingService = trackingService;
+    }
 
     @Override
     public void execute(Event event, MessengerSendClient sendClient) throws MessengerApiException, MessengerIOException {

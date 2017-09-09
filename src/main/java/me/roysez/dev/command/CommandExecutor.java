@@ -25,8 +25,8 @@ public class CommandExecutor {
         this.getStartedCommand = getStartedCommand;
         this.trackingCommand = trackingCommand;
 
-        map.put(Operation.GET_STARTED, new GetStartedCommand());
-        map.put(Operation.DOCUMENT_TRACKING, new TrackingCommand());
+        map.put(Operation.GET_STARTED, this.getStartedCommand);
+        map.put(Operation.DOCUMENT_TRACKING, this.trackingCommand);
     }
 
 
