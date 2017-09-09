@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import me.roysez.dev.command.CommandExecutor;
 import me.roysez.dev.service.Sender;
 import me.roysez.dev.service.TrackingService;
 import org.slf4j.Logger;
@@ -62,6 +63,7 @@ public class MessengerPlatformCallbackHandler {
     private final MessengerReceiveClient receiveClient;
     private final MessengerSendClient sendClient;
     private final Sender sender;
+    private final CommandExecutor commandExecutor;
 
     /**
      * Constructs the {@code MessengerPlatformCallbackHandler} and initializes the {@code MessengerReceiveClient}.
@@ -74,7 +76,7 @@ public class MessengerPlatformCallbackHandler {
     @Autowired
     public MessengerPlatformCallbackHandler(@Value("${messenger4j.appSecret}") final String appSecret,
                                             @Value("${messenger4j.verifyToken}") final String verifyToken,
-                                            final MessengerSendClient sendClient,Sender sender) {
+                                            final MessengerSendClient sendClient,Sender sender,CommandExecutor commandExecutor) {
 
         logger.debug("Initializing MessengerReceiveClient - appSecret: {} | verifyToken: {}", appSecret, verifyToken);
         this.receiveClient = MessengerPlatform.newReceiveClientBuilder(appSecret, verifyToken)
@@ -91,6 +93,7 @@ public class MessengerPlatformCallbackHandler {
                 .build();
         this.sendClient = sendClient;
         this.sender = sender;
+        this.commandExecutor = commandExecutor;
     }
 
     /**
@@ -148,11 +151,14 @@ public class MessengerPlatformCallbackHandler {
                 switch (messageText.toLowerCase()) {
 
                     case "get started":
+
+                        commandExecutor.execute(Operation.GET_STARTED,event,this.sendClient);
                         sender.handleGetStarted(senderId,this.sendClient);
                         break;
                     default:
                         if(messageText.toLowerCase().matches("^[0-9]{1,24}$")){
-                            sender.trackingDelivery(senderId,this.sendClient,messageText);
+                            commandExecutor.execute(Operation.DOCUMENT_TRACKING,event,this.sendClient);
+                           //  sender.trackingDelivery(senderId,this.sendClient,messageText);
                         } else
                             sender.sendTextMessage(senderId, messageText,this.sendClient);
                 }
