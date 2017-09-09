@@ -29,12 +29,9 @@ import com.github.messenger4j.send.buttons.Button;
 import com.github.messenger4j.send.templates.ButtonTemplate;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.github.messenger4j.setup.CallToAction;
-import com.github.messenger4j.setup.CallToActionType;
 import me.roysez.dev.command.CommandExecutor;
 import me.roysez.dev.service.Sender;
 import me.roysez.dev.service.TrackingService;
@@ -94,20 +91,6 @@ public class MessengerPlatformCallbackHandler {
                 .onMessageReadEvent(newMessageReadEventHandler())
                 .fallbackEventHandler(newFallbackEventHandler())
                 .build();
-        List<CallToAction> list = new ArrayList<>();
-        list.add(
-                CallToAction.newBuilder()
-                .title("tracking")
-                .payload("TRACKING")
-                .type(CallToActionType.POSTBACK)
-                .build());
-        try {
-            MessengerPlatform.newSetupClientBuilder(verifyToken).build().setupPersistentMenu(list);
-        } catch (MessengerApiException e) {
-            e.printStackTrace();
-        } catch (MessengerIOException e) {
-            e.printStackTrace();
-        }
         this.sendClient = sendClient;
         this.sender = sender;
         this.commandExecutor = commandExecutor;
@@ -170,7 +153,7 @@ public class MessengerPlatformCallbackHandler {
                     case "get started":
 
                         commandExecutor.execute(Operation.GET_STARTED,event,this.sendClient);
-                       // sender.handleGetStarted(senderId,this.sendClient);
+                        sender.handleGetStarted(senderId,this.sendClient);
                         break;
                     default:
                         if(messageText.toLowerCase().matches("^[0-9]{1,24}$")){
