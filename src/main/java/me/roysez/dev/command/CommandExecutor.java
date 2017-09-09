@@ -16,15 +16,11 @@ public class CommandExecutor {
 
     private static Map<Operation, Command> map = new HashMap<>();
 
-    @Autowired
-    private  static GetStartedCommand getStartedCommand;
 
-    @Autowired
-    private static  TrackingCommand trackingCommand;
 
     static {
-        map.put(Operation.GET_STARTED, getStartedCommand);
-        map.put(Operation.DOCUMENT_TRACKING, trackingCommand);
+        map.put(Operation.GET_STARTED, new GetStartedCommand());
+        map.put(Operation.DOCUMENT_TRACKING, new TrackingCommand());
 
     }
 
