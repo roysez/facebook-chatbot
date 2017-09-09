@@ -14,18 +14,24 @@ import java.util.Map;
 @Component
 public class CommandExecutor {
 
-    private static Map<Operation, Command> map = new HashMap<>();
+    private  Map<Operation, Command> map = new HashMap<>();
 
+    private GetStartedCommand getStartedCommand;
 
+    private TrackingCommand trackingCommand;
 
-    static {
+    @Autowired
+    public CommandExecutor(GetStartedCommand getStartedCommand, TrackingCommand trackingCommand) {
+        this.getStartedCommand = getStartedCommand;
+        this.trackingCommand = trackingCommand;
+
         map.put(Operation.GET_STARTED, new GetStartedCommand());
         map.put(Operation.DOCUMENT_TRACKING, new TrackingCommand());
-
     }
 
-    public static void execute(Operation operation, Event event,MessengerSendClient sendClient) throws MessengerApiException, MessengerIOException {
-        map.get(operation).execute(event,sendClient);
+
+    public  void execute(Operation operation, Event event,MessengerSendClient sendClient) throws MessengerApiException, MessengerIOException {
+        this.map.get(operation).execute(event,sendClient);
     }
 
 }
