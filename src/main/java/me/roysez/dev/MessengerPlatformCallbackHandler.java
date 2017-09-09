@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import me.roysez.dev.command.CommandExecutor;
 import me.roysez.dev.service.Sender;
 import me.roysez.dev.service.TrackingService;
 import org.slf4j.Logger;
@@ -62,6 +63,7 @@ public class MessengerPlatformCallbackHandler {
     private final MessengerReceiveClient receiveClient;
     private final MessengerSendClient sendClient;
     private final Sender sender;
+
 
     /**
      * Constructs the {@code MessengerPlatformCallbackHandler} and initializes the {@code MessengerReceiveClient}.
@@ -148,11 +150,14 @@ public class MessengerPlatformCallbackHandler {
                 switch (messageText.toLowerCase()) {
 
                     case "get started":
+
+                        CommandExecutor.execute(Operation.GET_STARTED,event,this.sendClient);
                         sender.handleGetStarted(senderId,this.sendClient);
                         break;
                     default:
                         if(messageText.toLowerCase().matches("^[0-9]{1,24}$")){
-                            sender.trackingDelivery(senderId,this.sendClient,messageText);
+                            CommandExecutor.execute(Operation.DOCUMENT_TRACKING,event,this.sendClient);
+                           //  sender.trackingDelivery(senderId,this.sendClient,messageText);
                         } else
                             sender.sendTextMessage(senderId, messageText,this.sendClient);
                 }
