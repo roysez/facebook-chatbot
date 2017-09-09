@@ -27,7 +27,8 @@ public class GetStartedCommand implements Command {
                 .build();
 
 
-        sendClient.sendTextMessage(recipientId, "Швидко дізнавайтесь статус ваших відправлень Нової Пошти " +
+        sendClient.sendTextMessage(recipientId,
+                "Швидко дізнавайтесь статус ваших відправлень Нової Пошти " +
                 "— просто надішліть номер накладної після вибору пункту \'Статус доставки\' " +
                 "і отримайте всю потрібну інформацію.  " +
                 "Щоб знайти найближчі відділення Нової пошти," +

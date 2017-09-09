@@ -25,15 +25,20 @@ import com.github.messenger4j.receive.handlers.PostbackEventHandler;
 import com.github.messenger4j.receive.handlers.QuickReplyMessageEventHandler;
 import com.github.messenger4j.receive.handlers.TextMessageEventHandler;
 import com.github.messenger4j.send.MessengerSendClient;
+import com.github.messenger4j.send.NotificationType;
+import com.github.messenger4j.send.Recipient;
 import com.github.messenger4j.send.buttons.Button;
 import com.github.messenger4j.send.templates.ButtonTemplate;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.github.messenger4j.setup.CallToAction;
+import com.github.messenger4j.setup.CallToActionType;
+import com.github.messenger4j.setup.MessengerSetupClient;
 import me.roysez.dev.command.CommandExecutor;
-import me.roysez.dev.service.Sender;
 import me.roysez.dev.service.TrackingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +67,6 @@ public class MessengerPlatformCallbackHandler {
 
     private final MessengerReceiveClient receiveClient;
     private final MessengerSendClient sendClient;
-    private final Sender sender;
     private final CommandExecutor commandExecutor;
 
     /**
@@ -76,7 +80,8 @@ public class MessengerPlatformCallbackHandler {
     @Autowired
     public MessengerPlatformCallbackHandler(@Value("${messenger4j.appSecret}") final String appSecret,
                                             @Value("${messenger4j.verifyToken}") final String verifyToken,
-                                            final MessengerSendClient sendClient,Sender sender,CommandExecutor commandExecutor) {
+                                            @Value("${messenger4j.pageAccessToken}") final String pageAccessToken,
+                                            final MessengerSendClient sendClient,CommandExecutor commandExecutor) {
 
         logger.debug("Initializing MessengerReceiveClient - appSecret: {} | verifyToken: {}", appSecret, verifyToken);
         this.receiveClient = MessengerPlatform.newReceiveClientBuilder(appSecret, verifyToken)
@@ -91,8 +96,33 @@ public class MessengerPlatformCallbackHandler {
                 .onMessageReadEvent(newMessageReadEventHandler())
                 .fallbackEventHandler(newFallbackEventHandler())
                 .build();
+        List<CallToAction> menuButtons = new ArrayList<>();
+        menuButtons.add(
+                CallToAction.newBuilder()
+                        .title("Меню вибору")
+                        .payload("GET_STARTED_PAYLOAD")
+                        .type(CallToActionType.POSTBACK)
+                        .build());
+        try {
+
+            MessengerSetupClient setupClient = MessengerPlatform.newSetupClientBuilder(pageAccessToken).build();
+            setupClient.setupStartButton("GET_STARTED_PAYLOAD");
+            setupClient.setupPersistentMenu(menuButtons);
+            setupClient.setupWelcomeMessage("Вітаємо нового користувача," +
+                    " швидко дізнавайтесь поточне місце знаходження посилки " +
+                    "та знаходьте найближчі відділення Нової Пошти до вашого місця знаходження " +
+                    " \n Не є офіційним додатком\'Нової пошти\'");
+
+            logger.info("Menu setup - successful ");
+        } catch (MessengerApiException e) {
+
+            logger.warn("MENU SETUP: Error with messenger API - {}",e);
+        } catch (MessengerIOException e) {
+
+            logger.warn("MENU SETUP: IO exception - {}",e);
+        }
+
         this.sendClient = sendClient;
-        this.sender = sender;
         this.commandExecutor = commandExecutor;
     }
 
@@ -151,19 +181,16 @@ public class MessengerPlatformCallbackHandler {
                 switch (messageText.toLowerCase()) {
 
                     case "get started":
-
                         commandExecutor.execute(Operation.GET_STARTED,event,this.sendClient);
-                        sender.handleGetStarted(senderId,this.sendClient);
                         break;
                     default:
                         if(messageText.toLowerCase().matches("^[0-9]{1,24}$")){
                             commandExecutor.execute(Operation.DOCUMENT_TRACKING,event,this.sendClient);
-                           //  sender.trackingDelivery(senderId,this.sendClient,messageText);
                         } else
-                            sender.sendTextMessage(senderId, messageText,this.sendClient);
+                            sendTextMessage(senderId, messageText,this.sendClient);
                 }
             } catch (MessengerApiException | MessengerIOException e) {
-                sender.handleSendException(e);
+                handleSendException(e);
             }
         };
     }
@@ -190,12 +217,18 @@ public class MessengerPlatformCallbackHandler {
                     payloadAsString = payload.asBinaryPayload().getUrl();
                 }
                 if (payload.isLocationPayload()) {
+                    try {
+                        commandExecutor.execute(Operation.GET_WAREHOUSES,event,sendClient);
+                    } catch (MessengerApiException | MessengerIOException e) {
+                        e.printStackTrace();
+                        sendTextMessage(senderId, e.toString() ,this.sendClient);
+                    }
                     payloadAsString = payload.asLocationPayload().getCoordinates().toString();
                 }
                 logger.info("Attachment of type '{}' with payload '{}'", attachmentType, payloadAsString);
             });
 
-            sender.sendTextMessage(senderId, "Message with attachment received",this.sendClient);
+            //    sendTextMessage(senderId, "Message with attachment received",this.sendClient);
         };
     }
 
@@ -211,10 +244,9 @@ public class MessengerPlatformCallbackHandler {
             logger.info("Received quick reply for message '{}' with payload '{}'", messageId, quickReplyPayload);
 
             if(quickReplyPayload.equals("GET_STATUS_DELIVERY_FORM_PAYLOAD")){
-
-                sender.sendTextMessage(senderId,"Введіть номер накладної",this.sendClient);
+                sendTextMessage(senderId,"Введіть номер накладної",this.sendClient);
             } else
-            sender.sendTextMessage(senderId, "Quick reply tapped",this.sendClient);
+                sendTextMessage(senderId, "Quick reply tapped",this.sendClient);
         };
     }
 
@@ -227,11 +259,18 @@ public class MessengerPlatformCallbackHandler {
             final String payload = event.getPayload();
             final Date timestamp = event.getTimestamp();
 
+            if(payload.equals("GET_STARTED_PAYLOAD"))
+            {
+                try {
+                    commandExecutor.execute(Operation.GET_STARTED,event,this.sendClient);
+                } catch (MessengerApiException | MessengerIOException e) {
+                    e.printStackTrace();
+                }
+            }
 
             logger.info("Received postback for user '{}' and page '{}' with payload '{}' at '{}'",
                     senderId, recipientId, payload, timestamp);
 
-            sender.sendTextMessage(senderId, "Postback called",this.sendClient);
         };
     }
 
@@ -260,7 +299,7 @@ public class MessengerPlatformCallbackHandler {
             logger.info("Received authentication for user '{}' and page '{}' with pass through param '{}' at '{}'",
                     senderId, recipientId, passThroughParam, timestamp);
 
-            sender.sendTextMessage(senderId, "Authentication successful",this.sendClient);
+            logger.info("Authentication successful");
         };
     }
 
@@ -321,7 +360,19 @@ public class MessengerPlatformCallbackHandler {
         };
     }
 
+    private void sendTextMessage(String recipientId, String text,MessengerSendClient sendClient) {
+        try {
+            final Recipient recipient = Recipient.newBuilder().recipientId(recipientId).build();
+            final NotificationType notificationType = NotificationType.REGULAR;
 
+            sendClient.sendTextMessage(recipient, notificationType, text);
+        } catch (MessengerApiException | MessengerIOException e) {
+            handleSendException(e);
+        }
+    }
 
+    private void handleSendException(Exception e) {
+        logger.error("Message could not be sent. An unexpected error occurred.", e);
+    }
 
 }

@@ -16,17 +16,20 @@ public class CommandExecutor {
 
     private  Map<Operation, Command> map = new HashMap<>();
 
-    private GetStartedCommand getStartedCommand;
-
-    private TrackingCommand trackingCommand;
+    private GetStartedCommand    getStartedCommand;
+    private GetWarehousesCommand getWarehousesCommand;
+    private TrackingCommand      trackingCommand;
 
     @Autowired
-    public CommandExecutor(GetStartedCommand getStartedCommand, TrackingCommand trackingCommand) {
+    public CommandExecutor(GetStartedCommand getStartedCommand, TrackingCommand trackingCommand,
+                           GetWarehousesCommand getWarehousesCommand) {
         this.getStartedCommand = getStartedCommand;
         this.trackingCommand = trackingCommand;
+        this.getWarehousesCommand = getWarehousesCommand;
 
         map.put(Operation.GET_STARTED, this.getStartedCommand);
         map.put(Operation.DOCUMENT_TRACKING, this.trackingCommand);
+        map.put(Operation.GET_WAREHOUSES, this.getWarehousesCommand);
     }
 
 
