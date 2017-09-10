@@ -79,13 +79,21 @@ public class GetWarehousesCommand implements Command {
                 String.class);
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.readValue(response.getBody(), ObjectNode.class);
+        String responseBody = response.getBody(), city = "";
         logger.info(response.getBody());
         try {
-           return mapper.readValue(node.get("address").get("city").toString(), String.class);
-                    
+            if(responseBody.contains("city"))
+                city =  mapper.readValue(node.get("address").get("city").toString(), String.class);
+            else if(responseBody.contains("town"))
+                city =   mapper.readValue(node.get("address").get("town").toString(), String.class);
+            else if(responseBody.contains("village"))
+                city =  mapper.readValue(node.get("address").get("village").toString(), String.class);
+
+
         } catch (NullPointerException e) {
-            return  mapper.readValue(node.get("address").get("town").toString(), String.class);
+            city = "Невідомі координати.Повторіть спробу";
         }
+        return city;
 
     }
 
