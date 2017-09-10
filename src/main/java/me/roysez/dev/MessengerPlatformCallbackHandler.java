@@ -228,7 +228,7 @@ public class MessengerPlatformCallbackHandler {
                 logger.info("Attachment of type '{}' with payload '{}'", attachmentType, payloadAsString);
             });
 
-                sendTextMessage(senderId, "Message with attachment received",this.sendClient);
+            //    sendTextMessage(senderId, "Message with attachment received",this.sendClient);
         };
     }
 
