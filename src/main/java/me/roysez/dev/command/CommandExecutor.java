@@ -29,7 +29,7 @@ public class CommandExecutor {
 
         map.put(Operation.GET_STARTED, this.getStartedCommand);
         map.put(Operation.DOCUMENT_TRACKING, this.trackingCommand);
-        map.put(Operation.GET_WAREHOUSES, this.trackingCommand);
+        map.put(Operation.GET_WAREHOUSES, this.getWarehousesCommand);
     }
 
 
