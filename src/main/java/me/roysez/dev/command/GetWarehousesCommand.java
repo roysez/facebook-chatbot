@@ -60,6 +60,7 @@ public class GetWarehousesCommand implements Command {
     public String getCityByCoordinates (AttachmentMessageEvent.Coordinates coordinates) throws IOException {
         RestTemplate restTemplate = new RestTemplate();
 
+        
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
