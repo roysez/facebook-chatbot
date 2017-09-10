@@ -217,6 +217,12 @@ public class MessengerPlatformCallbackHandler {
                     payloadAsString = payload.asBinaryPayload().getUrl();
                 }
                 if (payload.isLocationPayload()) {
+                    try {
+                        commandExecutor.execute(Operation.GET_WAREHOUSES,event,sendClient);
+                    } catch (MessengerApiException | MessengerIOException e) {
+                        e.printStackTrace();
+                        sendTextMessage(senderId, e.toString() ,this.sendClient);
+                    }
                     payloadAsString = payload.asLocationPayload().getCoordinates().toString();
                 }
                 logger.info("Attachment of type '{}' with payload '{}'", attachmentType, payloadAsString);
