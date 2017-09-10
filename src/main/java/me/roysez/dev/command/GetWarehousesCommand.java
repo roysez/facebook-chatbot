@@ -79,7 +79,7 @@ public class GetWarehousesCommand implements Command {
                 String.class);
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.readValue(response.getBody(), ObjectNode.class);
-        String responseBody = response.getBody(), city = "";
+        String responseBody = response.getBody(), city = "Невідомі координати.Повторіть спробу";
         logger.info(response.getBody());
         try {
             if(responseBody.contains("city"))
