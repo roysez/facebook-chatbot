@@ -60,7 +60,7 @@ public class GetWarehousesCommand implements Command {
     public String getCityByCoordinates (AttachmentMessageEvent.Coordinates coordinates) throws IOException {
         RestTemplate restTemplate = new RestTemplate();
 
-        
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -79,6 +79,7 @@ public class GetWarehousesCommand implements Command {
                 String.class);
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.readValue(response.getBody(), ObjectNode.class);
+        logger.info(response.getBody());
         return mapper.readValue(node.get("address").get("city").toString(), String.class);
 
     }
