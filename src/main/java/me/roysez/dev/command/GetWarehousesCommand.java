@@ -80,7 +80,12 @@ public class GetWarehousesCommand implements Command {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.readValue(response.getBody(), ObjectNode.class);
         logger.info(response.getBody());
-        return mapper.readValue(node.get("address").get("city").toString(), String.class);
+        try {
+           return mapper.readValue(node.get("address").get("city").toString(), String.class);
+                    
+        } catch (NullPointerException e) {
+            return  mapper.readValue(node.get("address").get("town").toString(), String.class);
+        }
 
     }
 
