@@ -73,7 +73,7 @@ public class GetWarehousesCommand implements Command {
                         warehouses = filterWarehouses(warehouses,coordinates);
                     StringBuilder response = new StringBuilder().append("Test of output");
                         warehouses.forEach(warehouse -> response.append(warehouse.getDescription() + "\n"));
-
+                    warehouses.forEach(warehouse -> System.out.println(warehouse.getDescription()));
                     sendClient.sendTextMessage(recipientId,response.toString());
 
                 } catch (MessengerApiException | MessengerIOException | IOException e) {
@@ -177,8 +177,8 @@ public class GetWarehousesCommand implements Command {
                 .collect(Collectors.toList());
     }
 
-    private double distanceInKm(AttachmentMessageEvent.Coordinates currentLocation,String longitude,String latitude
-                               ){
+    private double distanceInKm(AttachmentMessageEvent.Coordinates currentLocation,
+                                String longitude,String latitude){
 
 
         Point2D first = new Point2D.Double();
