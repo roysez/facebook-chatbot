@@ -19,10 +19,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class GetWarehousesCommand implements Command {
@@ -61,10 +64,18 @@ public class GetWarehousesCommand implements Command {
             if (payload.isLocationPayload()) {
                 payloadAsString = payload.asLocationPayload().getCoordinates().toString();
                 try {
-                    sendClient.sendTextMessage(recipientId,
-                            getNearWarehouses(
-                            getCityByCoordinates(payload.asLocationPayload().getCoordinates()))
-                    );
+                    AttachmentMessageEvent.Coordinates coordinates = payload.asLocationPayload().getCoordinates();
+
+                    List<Warehouse> warehouses = getWarehousesByCity(
+                            getCityByCoordinates(payload.asLocationPayload().getCoordinates()));
+
+                    if(!warehouses.isEmpty())
+                        warehouses = filterWarehouses(warehouses,coordinates);
+                    StringBuilder response = new StringBuilder().append("Test of output");
+                        warehouses.forEach(warehouse -> response.append(warehouse.getDescription() + "\n"));
+
+                    sendClient.sendTextMessage(recipientId,response.toString());
+
                 } catch (MessengerApiException | MessengerIOException | IOException e) {
                     e.printStackTrace();
                 }
@@ -112,8 +123,7 @@ public class GetWarehousesCommand implements Command {
 
     }
 
-
-    public String getNearWarehouses(String cityName){
+    private List<Warehouse> getWarehousesByCity(String cityName){
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -129,6 +139,8 @@ public class GetWarehousesCommand implements Command {
         request.put("calledMethod", "getWarehouses");
         request.put("methodProperties",new JSONObject(warehouseTracking));
 
+        logger.info("POST request - Get Warehouses ar city {} - {}",cityName,request.toString());
+
         System.out.println(request.toString());
         HttpEntity<String> entity = new HttpEntity<String>(request.toString()
                 .replace("cityName","CityName")
@@ -139,10 +151,12 @@ public class GetWarehousesCommand implements Command {
         ResponseEntity<String> response = restTemplate
                 .exchange("https://api.novaposhta.ua/v2.0/json/", HttpMethod.POST, entity, String.class);
 
+        List<Warehouse> warehouseList = Collections.emptyList();
+
         try {
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode node = mapper.readValue(response.getBody(), ObjectNode.class);
-            List<Warehouse> warehouseList = mapper.readValue(node.get("data").toString(),
+             warehouseList = mapper.readValue(node.get("data").toString(),
                     mapper.getTypeFactory().constructCollectionType(List.class,Warehouse.class));
 
             for (Warehouse warehouse : warehouseList) {
@@ -151,9 +165,43 @@ public class GetWarehousesCommand implements Command {
         } catch (Exception e){
             e.printStackTrace();
         }
-       // System.out.println(response.getBody());
-        return "Test";
 
+        return warehouseList;
 
     }
+
+    private List<Warehouse>  filterWarehouses(List<Warehouse> warehouses, AttachmentMessageEvent.Coordinates userCoorinates){
+        return  warehouses.stream()
+                .filter(warehouse -> distanceInKm(userCoorinates,
+                        warehouse.getLongitude(),warehouse.getLatitude() ) < 2d)
+                .collect(Collectors.toList());
+    }
+
+    private double distanceInKm(AttachmentMessageEvent.Coordinates currentLocation,String longitude,String latitude
+                               ){
+
+
+        Point2D first = new Point2D.Double();
+        first.setLocation(currentLocation.getLongitude(),currentLocation.getLatitude());
+        Point2D second = new Point2D.Double();
+        second.setLocation(Double.valueOf(longitude),Double.valueOf(latitude));
+
+        double R = 6371; // Radius of the earth in km
+        double dLat = deg2rad(second.getY()-first.getY());  // deg2rad below
+        double dLon = deg2rad(second.getX()-first.getX());
+        double a =
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                        Math.cos(deg2rad(first.getY())) * Math.cos(deg2rad(second.getY())) *
+                                Math.sin(dLon/2) * Math.sin(dLon/2)
+                ;
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double d = R * c; // Distance in km
+        return d;
+
+    }
+    private  static double deg2rad(double deg) {
+        return deg * (Math.PI/180);
+    }
+
+
 }
