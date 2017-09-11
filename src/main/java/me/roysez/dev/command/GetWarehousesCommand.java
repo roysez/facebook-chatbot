@@ -140,13 +140,14 @@ public class GetWarehousesCommand implements Command {
         request.put("calledMethod", "getWarehouses");
         request.put("methodProperties",new JSONObject(warehouseTracking));
 
-        logger.info("POST request - Get Warehouses ar city {} - {}",cityName,request.toString());
+        String requestString = request.toString()
+                .replace("cityName","CityName")
+                .replace("language","Language");
+
+        logger.info("\n POST request - Get Warehouses at city {} - {}",cityName,request.toString());
 
        // System.out.println(request.toString());
-        HttpEntity<String> entity = new HttpEntity<String>(request.toString()
-                .replace("cityName","CityName")
-                .replace("language","Language"),
-                httpHeaders);
+        HttpEntity<String> entity = new HttpEntity<String>(requestString, httpHeaders);
 
         System.out.println(entity.getBody());
 
@@ -155,12 +156,13 @@ public class GetWarehousesCommand implements Command {
                 .exchange("https://api.novaposhta.ua/v2.0/json/", HttpMethod.POST, entity, String.class);
 
         List<Warehouse> warehouseList = new ArrayList<>();
+        System.out.println(response.getStatusCode());
+        System.out.println(response.getBody());
 
         try {
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode node = mapper.readValue(response.getBody(), ObjectNode.class);
-            System.out.println(response.getStatusCode());
-            System.out.println(response.getBody());
+
              warehouseList = mapper.readValue(node.get("data").toString(),
                      mapper.getTypeFactory().constructCollectionType(List.class,Warehouse.class));
 
