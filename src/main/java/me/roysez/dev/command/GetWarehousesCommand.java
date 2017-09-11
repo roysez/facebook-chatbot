@@ -142,11 +142,13 @@ public class GetWarehousesCommand implements Command {
 
         logger.info("POST request - Get Warehouses ar city {} - {}",cityName,request.toString());
 
-        System.out.println(request.toString());
+       // System.out.println(request.toString());
         HttpEntity<String> entity = new HttpEntity<String>(request.toString()
                 .replace("cityName","CityName")
                 .replace("language","Language"),
                 httpHeaders);
+
+        System.out.println(entity.getBody());
 
         // send request and parse result
         ResponseEntity<String> response = restTemplate
