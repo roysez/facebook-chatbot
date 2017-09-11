@@ -135,8 +135,18 @@ public class GetWarehousesCommand implements Command {
         ResponseEntity<String> response = restTemplate
                 .exchange("https://api.novaposhta.ua/v2.0/json/", HttpMethod.POST, entity, String.class);
 
-        ObjectMapper mapper = new ObjectMapper();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectNode node = mapper.readValue(response.getBody(), ObjectNode.class);
+            List<Warehouse> warehouseList = mapper.readValue(node.get("data").toString(),
+                    mapper.getTypeFactory().constructCollectionType(List.class,Warehouse.class));
 
+            for (Warehouse warehouse : warehouseList) {
+                System.out.println(warehouse);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
         System.out.println(response.getBody());
         return "Test";
 

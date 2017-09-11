@@ -44,6 +44,20 @@ public class Warehouse {
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
+    @Override
+    public String toString() {
+        return "Warehouse{" +
+                "description='" + description + '\'' + '\n' +
+                ", shortAddress='" + shortAddress + '\'' + '\n' +
+                ", phone='" + phone + '\'' + '\n' +
+                ", number='" + number + '\'' + '\n' +
+                ", cityDescription='" + cityDescription + '\'' + '\n' +
+                ", longitude='" + longitude + '\'' + '\n' +
+                ", latitude='" + latitude + '\'' + '\n' +
+                ", schedule=" + schedule + '\n' +
+                '}';
+    }
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonPropertyOrder({
             "Monday",
