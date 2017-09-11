@@ -167,6 +167,8 @@ public class GetWarehousesCommand implements Command {
             }
         } catch (Exception e){
             e.printStackTrace();
+            System.out.println("SOMETHING WRONG");
+            System.out.println(warehouseList.isEmpty());
         }
 
         return warehouseList;
