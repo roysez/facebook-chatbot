@@ -159,6 +159,7 @@ public class GetWarehousesCommand implements Command {
         try {
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode node = mapper.readValue(response.getBody(), ObjectNode.class);
+            System.out.println(node.get("data"));
              warehouseList = mapper.readValue(node.get("data").toString(),
                      mapper.getTypeFactory().constructCollectionType(List.class,Warehouse.class));
 
