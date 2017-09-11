@@ -244,7 +244,7 @@ public class MessengerPlatformCallbackHandler {
             logger.info("Received quick reply for message '{}' with payload '{}'", messageId, quickReplyPayload);
 
             if(quickReplyPayload.equals("GET_STATUS_DELIVERY_FORM_PAYLOAD")){
-                sendTextMessage(senderId,"Введіть номер накладної",this.sendClient);
+                sendTextMessage(senderId,"Введіть номер накладної \n (Тестові дані: 59000276536092)",this.sendClient);
             } else
                 sendTextMessage(senderId, "Quick reply tapped",this.sendClient);
         };

@@ -130,7 +130,10 @@ public class GetWarehousesCommand implements Command {
         request.put("methodProperties",new JSONObject(warehouseTracking));
 
         System.out.println(request.toString());
-        HttpEntity<String> entity = new HttpEntity<String>(request.toString(), httpHeaders);
+        HttpEntity<String> entity = new HttpEntity<String>(request.toString()
+                .replace("cityName","CityName")
+                .replace("language","Language"),
+                httpHeaders);
 
         // send request and parse result
         ResponseEntity<String> response = restTemplate
