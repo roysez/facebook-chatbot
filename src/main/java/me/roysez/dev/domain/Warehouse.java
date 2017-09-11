@@ -87,6 +87,7 @@ public class Warehouse {
 
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     @Data
     @AllArgsConstructor
     public static class WarehouseTracking {

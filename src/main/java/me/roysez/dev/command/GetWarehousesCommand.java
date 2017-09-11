@@ -156,8 +156,7 @@ public class GetWarehousesCommand implements Command {
                 .exchange("https://api.novaposhta.ua/v2.0/json/", HttpMethod.POST, entity, String.class);
 
         List<Warehouse> warehouseList = new ArrayList<>();
-        System.out.println(response.getStatusCode());
-        System.out.println(response.getBody());
+
 
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -166,14 +165,10 @@ public class GetWarehousesCommand implements Command {
              warehouseList = mapper.readValue(node.get("data").toString(),
                      mapper.getTypeFactory().constructCollectionType(List.class,Warehouse.class));
 
-            for (Warehouse warehouse : warehouseList) {
-                System.out.println("FUCNTION:" + warehouse.getDescription() );
-            }
-            System.out.println(warehouseList.isEmpty());
+            System.out.println("Data response empty -" + warehouseList.isEmpty());
         } catch (Exception e){
             e.printStackTrace();
-            System.out.println("SOMETHING WRONG");
-            System.out.println(warehouseList.isEmpty());
+
         }
 
         return warehouseList;
