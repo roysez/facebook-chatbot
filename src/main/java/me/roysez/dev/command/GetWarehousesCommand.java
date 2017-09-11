@@ -165,6 +165,7 @@ public class GetWarehousesCommand implements Command {
             for (Warehouse warehouse : warehouseList) {
                 System.out.println("FUCNTION:" + warehouse.getDescription() );
             }
+            System.out.println(warehouseList.isEmpty());
         } catch (Exception e){
             e.printStackTrace();
             System.out.println("SOMETHING WRONG");
