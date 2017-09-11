@@ -129,6 +129,7 @@ public class GetWarehousesCommand implements Command {
         request.put("calledMethod", "getWarehouses");
         request.put("methodProperties",new JSONObject(warehouseTracking));
 
+        System.out.println(request.toString());
         HttpEntity<String> entity = new HttpEntity<String>(request.toString(), httpHeaders);
 
         // send request and parse result
@@ -142,12 +143,12 @@ public class GetWarehousesCommand implements Command {
                     mapper.getTypeFactory().constructCollectionType(List.class,Warehouse.class));
 
             for (Warehouse warehouse : warehouseList) {
-                System.out.println(warehouse);
+              //  System.out.println(warehouse);
             }
         } catch (Exception e){
             e.printStackTrace();
         }
-        System.out.println(response.getBody());
+       // System.out.println(response.getBody());
         return "Test";
 
 
