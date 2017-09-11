@@ -1,5 +1,6 @@
 package me.roysez.dev.command;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.messenger4j.exceptions.MessengerApiException;
@@ -115,6 +116,7 @@ public class GetWarehousesCommand implements Command {
 
     public String getNearWarehouses(String cityName){
         RestTemplate restTemplate = new RestTemplate();
+        ObjectMapper mapper = new ObjectMapper();
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -129,15 +131,26 @@ public class GetWarehousesCommand implements Command {
         request.put("calledMethod", "getWarehouses");
         request.put("methodProperties",warehouseTracking);
 
+
+        try {
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request.toString()));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
         HttpEntity<String> entity = new HttpEntity<String>(request.toString(), httpHeaders);
 
         // send request and parse result
         ResponseEntity<String> response = restTemplate
                 .exchange("https://api.novaposhta.ua/v2.0/json/", HttpMethod.POST, entity, String.class);
 
-        ObjectMapper mapper = new ObjectMapper();
 
-        System.out.println(response.getBody());
+
+        try {
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response.getBody()));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
         return "Test";
 
 
