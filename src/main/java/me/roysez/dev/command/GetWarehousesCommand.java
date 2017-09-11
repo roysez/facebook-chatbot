@@ -71,8 +71,9 @@ public class GetWarehousesCommand implements Command {
 
                     if(!warehouses.isEmpty())
                         warehouses = filterWarehouses(warehouses,coordinates);
+
                     StringBuilder response = new StringBuilder().append("Test of output");
-                        warehouses.forEach(warehouse -> response.append(warehouse.getDescription() + "\n"));
+                    warehouses.forEach(warehouse -> response.append(warehouse.getDescription() + "\n"));
                     warehouses.forEach(warehouse -> System.out.println(warehouse.getDescription()));
                     sendClient.sendTextMessage(recipientId,response.toString());
 
@@ -160,7 +161,7 @@ public class GetWarehousesCommand implements Command {
                     mapper.getTypeFactory().constructCollectionType(List.class,Warehouse.class));
 
             for (Warehouse warehouse : warehouseList) {
-              //  System.out.println(warehouse);
+                System.out.println("FUCNTION:" + warehouse.getDescription() );
             }
         } catch (Exception e){
             e.printStackTrace();
