@@ -73,6 +73,7 @@ public class GetWarehousesCommand implements Command {
                         warehouses = filterWarehouses(warehouses,coordinates);
 
                     StringBuilder response = new StringBuilder().append("Test of output");
+                    response.append(warehouses.get(0).getDescription());
                     warehouses.forEach(warehouse -> response.append(warehouse.getDescription() + "\n"));
                     warehouses.forEach(warehouse -> System.out.println(warehouse.getDescription()));
                     sendClient.sendTextMessage(recipientId,response.toString());
@@ -147,7 +148,6 @@ public class GetWarehousesCommand implements Command {
         ResponseEntity<String> response = restTemplate
                 .exchange("https://api.novaposhta.ua/v2.0/json/", HttpMethod.POST, entity, String.class);
 
-        System.out.println("RESPONSE"+response.getBody().toString());
         List<Warehouse> warehouseList = new ArrayList<>();
 
 
