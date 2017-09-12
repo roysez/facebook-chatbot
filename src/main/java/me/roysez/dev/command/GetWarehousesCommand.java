@@ -125,6 +125,7 @@ public class GetWarehousesCommand implements Command {
     }
 
     private List<Warehouse> getWarehousesByCity(String cityName){
+
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -133,28 +134,20 @@ public class GetWarehousesCommand implements Command {
         JSONObject request = new JSONObject();
 
         Warehouse.WarehouseTracking warehouseTracking =
-                            new Warehouse.WarehouseTracking(cityName,"ru ИЛИ ua");
+                new Warehouse.WarehouseTracking(cityName,"ru ИЛИ ua");
 
         request.put("apiKey", apiKey);
         request.put("modelName", "AddressGeneral");
         request.put("calledMethod", "getWarehouses");
         request.put("methodProperties",new JSONObject(warehouseTracking));
 
-        String requestString = request.toString()
-                .replace("cityName","CityName")
-                .replace("language","Language");
-
-        logger.info("\n POST request - Get Warehouses at city {} - {}",cityName,request.toString());
-
-       // System.out.println(request.toString());
-        HttpEntity<String> entity = new HttpEntity<String>(requestString, httpHeaders);
-
-        System.out.println(entity.getBody());
+        HttpEntity<String> entity = new HttpEntity<String>(request.toString(), httpHeaders);
 
         // send request and parse result
         ResponseEntity<String> response = restTemplate
                 .exchange("https://api.novaposhta.ua/v2.0/json/", HttpMethod.POST, entity, String.class);
 
+        System.out.println("RESPONSE"+response.getBody().toString());
         List<Warehouse> warehouseList = new ArrayList<>();
 
 
