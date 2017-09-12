@@ -143,10 +143,13 @@ public class GetWarehousesCommand implements Command {
         request.put("apiKey", apiKey);
         request.put("modelName", "AddressGeneral");
         request.put("calledMethod", "getWarehouses");
-        request.put("methodProperties",new JSONObject(warehouseTracking));
+        request.put("methodProperties",new JSONObject(warehouseTracking).toString());
 
-        HttpEntity<String> entity = new HttpEntity<String>(request.toString(), httpHeaders);
+        HttpEntity<String> entity = new HttpEntity<String>(request.toString()
+                .replace("cityName","CityName")
+                .replace("language","Language"), httpHeaders);
 
+        System.out.println(entity.getBody()+"\n\n\n");
         // send request and parse result
         ResponseEntity<String> response = restTemplate
                 .exchange("https://api.novaposhta.ua/v2.0/json/", HttpMethod.POST, entity, String.class);
