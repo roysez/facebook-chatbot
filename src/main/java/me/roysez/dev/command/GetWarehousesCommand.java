@@ -72,9 +72,12 @@ public class GetWarehousesCommand implements Command {
                     if(!warehouses.isEmpty())
                         warehouses = filterWarehouses(warehouses,coordinates);
 
-                    StringBuilder response = new StringBuilder().append("Test of output");
+                    StringBuilder response = new StringBuilder().append("Test of output \n");
                     response.append(warehouses.get(0).getDescription());
-                    warehouses.forEach(warehouse -> response.append(warehouse.getDescription() + "\n"));
+                    for (int i = 0; i < 5; i++) {
+                        response.append(warehouses.get(i).getDescription()+'\n');
+                    }
+                 //   warehouses.forEach(warehouse -> response.append(warehouse.getDescription() + "\n"));
                     warehouses.forEach(warehouse -> System.out.println(warehouse.getDescription()));
                     sendClient.sendTextMessage(recipientId,response.toString());
 
