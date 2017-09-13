@@ -8,9 +8,16 @@ import com.github.messenger4j.receive.events.AttachmentMessageEvent;
 import com.github.messenger4j.receive.events.Event;
 import com.github.messenger4j.receive.events.TextMessageEvent;
 import com.github.messenger4j.send.MessengerSendClient;
+import com.github.messenger4j.send.SenderAction;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import com.vdurmont.emoji.EmojiManager;
 import me.roysez.dev.domain.Document;
 import me.roysez.dev.domain.DocumentTracking;
 import me.roysez.dev.domain.Warehouse;
+import me.roysez.dev.maps.MapUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,10 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.awt.geom.Point2D;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -65,23 +69,39 @@ public class GetWarehousesCommand implements Command {
                 payloadAsString = payload.asLocationPayload().getCoordinates().toString();
                 try {
                     AttachmentMessageEvent.Coordinates coordinates = payload.asLocationPayload().getCoordinates();
-
+                    sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
+                    sendClient.sendTextMessage(recipientId,"Зачекайте будь-ласка, аналізуємо вашу локацію");
+                    sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
                     List<Warehouse> warehouses = getWarehousesByCity(
                             getCityByCoordinates(payload.asLocationPayload().getCoordinates()));
 
-                    if(!warehouses.isEmpty())
-                        warehouses = filterWarehouses(warehouses,coordinates);
+                    Map<Warehouse,Double> mapOfWarehouses = Collections.EMPTY_MAP;
+                    StringBuilder response = new StringBuilder();
+                    final int[] i = {0};
+                    if(!warehouses.isEmpty()) {
+                        mapOfWarehouses = filterWarehouses(warehouses, coordinates);
+                        mapOfWarehouses = mapOfWarehouses.entrySet().stream()
+                                .sorted(Map.Entry.comparingByValue())
+                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                                        (e1, e2) -> e1, LinkedHashMap::new));
+                        response.append("Найближчі відділення до вас"+ EmojiManager.getForAlias("truck").getUnicode() + '\n'+ '\n');
+                        mapOfWarehouses.forEach((key, value) -> {
+                            if(i[0]<3) {
+                                response.append(EmojiManager.getForAlias("house").getUnicode() +
+                                        key.getDescription() + " ( "
+                                        + (int) (value * 1000) + " meters)\n\n");
+                            }
+                            i[0]++;
+                        });
 
-                    StringBuilder response = new StringBuilder().append("Test of output \n");
-                    response.append(warehouses.get(0).getDescription());
-                    for (int i = 0; i < 5; i++) {
-                        response.append(warehouses.get(i).getDescription()+'\n');
-                    }
-                 //   warehouses.forEach(warehouse -> response.append(warehouse.getDescription() + "\n"));
-                    warehouses.forEach(warehouse -> System.out.println(warehouse.getDescription()));
-                    sendClient.sendTextMessage(recipientId,response.toString());
+                    } else  response.append("Щось пішло не так :( Повторіть спробу пізніше \n");
 
-                } catch (MessengerApiException | MessengerIOException | IOException e) {
+                    mapOfWarehouses.forEach((warehouse, aDouble) -> System.out.println(warehouse.getDescription() + " ("+aDouble+") \n"));
+
+                    sendClient.sendTextMessage(recipientId,response.toString().replace(":",":\n"+
+                            EmojiManager.getForAlias("information_source").getUnicode()));
+
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -130,29 +150,20 @@ public class GetWarehousesCommand implements Command {
 
     private List<Warehouse> getWarehousesByCity(String cityName){
 
-        RestTemplate restTemplate = new RestTemplate();
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-
-        JSONObject request = new JSONObject();
-
-        Warehouse.WarehouseTracking warehouseTracking =
-                new Warehouse.WarehouseTracking(cityName,"ru ИЛИ ua");
-
-        request.put("apiKey", apiKey);
-        request.put("modelName", "AddressGeneral");
-        request.put("calledMethod", "getWarehouses");
-        request.put("methodProperties",new JSONObject(warehouseTracking).toString());
-
-        HttpEntity<String> entity = new HttpEntity<String>(request.toString()
-                .replace("cityName","CityName")
-                .replace("language","Language"), httpHeaders);
-
-        System.out.println(entity.getBody()+"\n\n\n");
-        // send request and parse result
-        ResponseEntity<String> response = restTemplate
-                .exchange("https://api.novaposhta.ua/v2.0/json/", HttpMethod.POST, entity, String.class);
+        HttpResponse<String> response = null;
+        try {
+            response = Unirest.post("https://api.novaposhta.ua/v2.0/json/")
+                    .header("content-type", "application/json")
+                    .header("cache-control", "no-cache")
+                    .header("postman-token", "274da9e9-e3d1-9236-4dd3-b72ad07ce560")
+                    .body("{\"apiKey\":\""+apiKey+"\",\"modelName\":\"AddressGeneral\"," +
+                            "\"calledMethod\":\"getWarehouses\"," +
+                            "\"methodProperties\":{\"CityName\":\""+cityName+"\"," +
+                            "\"Language\":\"ru ИЛИ ua\"}}\r\n")
+                    .asString();
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
 
         List<Warehouse> warehouseList = new ArrayList<>();
 
@@ -174,38 +185,23 @@ public class GetWarehousesCommand implements Command {
 
     }
 
-    private List<Warehouse>  filterWarehouses(List<Warehouse> warehouses, AttachmentMessageEvent.Coordinates userCoorinates){
-        return  warehouses.stream()
-                .filter(warehouse -> distanceInKm(userCoorinates,
-                        warehouse.getLongitude(),warehouse.getLatitude() ) < 2d)
-                .collect(Collectors.toList());
-    }
+    private Map<Warehouse,Double>  filterWarehouses(List<Warehouse> warehouses, AttachmentMessageEvent.Coordinates userCoorinates){
 
-    private double distanceInKm(AttachmentMessageEvent.Coordinates currentLocation,
-                                String longitude,String latitude){
+        Map<Warehouse,Double> map = new HashMap<>();
+        warehouses.forEach(warehouse ->{
+            Double distance = MapUtil.distanceInKm(userCoorinates,
+                    warehouse.getLongitude(),warehouse.getLatitude() );
 
+            if(!warehouse.getDescription().contains("Поштомат") && distance < 5d)
+                map.put(warehouse,distance);
 
-        Point2D first = new Point2D.Double();
-        first.setLocation(currentLocation.getLongitude(),currentLocation.getLatitude());
-        Point2D second = new Point2D.Double();
-        second.setLocation(Double.valueOf(longitude),Double.valueOf(latitude));
+        });
+        return  map;
 
-        double R = 6371; // Radius of the earth in km
-        double dLat = deg2rad(second.getY()-first.getY());  // deg2rad below
-        double dLon = deg2rad(second.getX()-first.getX());
-        double a =
-                Math.sin(dLat/2) * Math.sin(dLat/2) +
-                        Math.cos(deg2rad(first.getY())) * Math.cos(deg2rad(second.getY())) *
-                                Math.sin(dLon/2) * Math.sin(dLon/2)
-                ;
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        double d = R * c; // Distance in km
-        return d;
 
     }
-    private  static double deg2rad(double deg) {
-        return deg * (Math.PI/180);
-    }
+
+
 
 
 }

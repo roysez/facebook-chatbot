@@ -27,6 +27,7 @@ import com.github.messenger4j.receive.handlers.TextMessageEventHandler;
 import com.github.messenger4j.send.MessengerSendClient;
 import com.github.messenger4j.send.NotificationType;
 import com.github.messenger4j.send.Recipient;
+import com.github.messenger4j.send.SenderAction;
 import com.github.messenger4j.send.buttons.Button;
 import com.github.messenger4j.send.templates.ButtonTemplate;
 
@@ -159,7 +160,7 @@ public class MessengerPlatformCallbackHandler {
             this.receiveClient.processCallbackPayload(payload, signature);
             logger.debug("Processed callback payload successfully");
             return ResponseEntity.status(HttpStatus.OK).build();
-        } catch (MessengerVerificationException e) {
+        } catch (Exception e) {
             logger.warn("Processing of callback payload failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -174,6 +175,7 @@ public class MessengerPlatformCallbackHandler {
             final String senderId = event.getSender().getId();
             final Date timestamp = event.getTimestamp();
 
+
             logger.info("Received message '{}' with text '{}' from user '{}' at '{}'",
                     messageId, messageText, senderId, timestamp);
 
@@ -187,7 +189,16 @@ public class MessengerPlatformCallbackHandler {
                         if(messageText.toLowerCase().matches("^[0-9]{1,24}$")){
                             commandExecutor.execute(Operation.DOCUMENT_TRACKING,event,this.sendClient);
                         } else
-                            sendTextMessage(senderId, messageText,this.sendClient);
+                        {
+                            sendClient.sendSenderAction(senderId, SenderAction.TYPING_ON);
+                            final List<Button> buttons = Button.newListBuilder()
+                                    .addPostbackButton("Відкрити Меню", "GET_STARTED_PAYLOAD").toList()
+                                    .build();
+
+                            final ButtonTemplate buttonTemplate = ButtonTemplate.newBuilder("Вибачте, я вас не розумію :( \n" +
+                                    "Виберіть будь-яку команду доступну у меню...", buttons).build();
+                            sendClient.sendTemplate(senderId, buttonTemplate);
+                        }
                 }
             } catch (MessengerApiException | MessengerIOException e) {
                 handleSendException(e);
