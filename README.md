@@ -7,6 +7,8 @@ Implemented using Java, Spring Boot and Java library
   for building Chatbots on the Facebook Messenger Platform. Application deployed on [Heroku](https://dashboard.heroku.com/)
 <br/> All messages with chatbot in Ukrainian !
 <br/> Nova Poshta API used: [https://devcenter.novaposhta.ua](https://devcenter.novaposhta.ua/docs/services/)
+
+![](https://imgur.com/6SPi3Ry)
 # This bot's URL
 
 ![Alt Text](https://media.giphy.com/media/xT9IgtnxLs0IFUFsqI/giphy.gif)

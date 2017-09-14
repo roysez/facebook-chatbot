@@ -36,8 +36,9 @@ public class TrackingCommand implements Command {
         TextMessageEvent textMessageEvent;
 
         if(event instanceof TextMessageEvent)
-             textMessageEvent = (TextMessageEvent) event;
-        else throw new IllegalArgumentException();
+            textMessageEvent = (TextMessageEvent) event;
+        else
+            throw new IllegalArgumentException();
 
         final String documentNumber = textMessageEvent.getText();
         final String recipientId = event.getSender().getId();

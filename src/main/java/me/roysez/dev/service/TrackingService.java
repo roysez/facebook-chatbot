@@ -16,7 +16,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Optional;
 
 @Service
 public class TrackingService {
@@ -66,11 +65,11 @@ public class TrackingService {
         ObjectMapper mapper = new ObjectMapper();
         DocumentTracking documentTracking;
 
-            ObjectNode node = mapper.readValue(loginResponse.getBody(), ObjectNode.class);
-            documentTracking = mapper.readValue(node.get("data").get(0).toString(), DocumentTracking.class);
+        ObjectNode node = mapper.readValue(loginResponse.getBody(), ObjectNode.class);
+        documentTracking = mapper.readValue(node.get("data").get(0).toString(), DocumentTracking.class);
 
-            logger.info("Response status for document tracking \n {}",node.get("Status"));
+        logger.info("Response status for document tracking \n {}",node.get("Status"));
 
-            return documentTracking;
+        return documentTracking;
     }
 }
