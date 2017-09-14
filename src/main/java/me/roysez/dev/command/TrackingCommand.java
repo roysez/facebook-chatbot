@@ -7,6 +7,8 @@ import com.github.messenger4j.receive.events.TextMessageEvent;
 import com.github.messenger4j.send.MessengerSendClient;
 import com.github.messenger4j.send.QuickReply;
 import com.github.messenger4j.send.SenderAction;
+import com.github.messenger4j.send.buttons.Button;
+import com.github.messenger4j.send.templates.ButtonTemplate;
 import com.vdurmont.emoji.EmojiManager;
 import me.roysez.dev.domain.DocumentTracking;
 import me.roysez.dev.service.TrackingService;
@@ -45,16 +47,27 @@ public class TrackingCommand implements Command {
             DocumentTracking documentTracking = trackingService.track(documentNumber);
             sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
             StringBuilder response = new StringBuilder()
-                    .append(EmojiManager.getForAlias("small_airplane").getUnicode()
-                            + " Відправлення з міста: " + documentTracking.getCitySender() + "\n "
-                            + EmojiManager.getForAlias("airplane_arriving").getUnicode()
-                            + " До: " + documentTracking.getCityRecipient() + "\n"
+                    .append(
+                            EmojiManager.getForAlias("airplane_arriving").getUnicode()
+                            + " " + documentTracking.getCitySender() + " "
+                            + EmojiManager.getForAlias("arrow_right").getUnicode()
+                            + " " + documentTracking.getCityRecipient() +"\n"
+                            + EmojiManager.getForAlias("red_circle").getUnicode()+ " "
+                                    + documentTracking.getWarehouseRecipient() + "\n"
+
                             + EmojiManager.getForAlias("timer_clock").getUnicode()
                             + " Дата та час доставки: " + documentTracking.getRecipientDateTime() + "\n"
-                            + EmojiManager.getForAlias("envelope").getUnicode()
+
+
+                            + EmojiManager.getForAlias("mailbox_closed").getUnicode()
                             + " Статус: "  + documentTracking.getStatus() + "\n");
 
-            sendClient.sendTextMessage(recipientId,response.toString());
+            final List<Button> buttons = Button.newListBuilder()
+                    .addPostbackButton("Повернутися до Меню", "GET_STARTED_PAYLOAD").toList()
+                    .build();
+
+            final ButtonTemplate buttonTemplate = ButtonTemplate.newBuilder(response.toString(), buttons).build();
+            sendClient.sendTemplate(recipientId, buttonTemplate);
 
         } catch (Exception e){
             e.printStackTrace();

@@ -6,6 +6,7 @@ import com.github.messenger4j.receive.events.Event;
 import com.github.messenger4j.send.MessengerSendClient;
 import com.github.messenger4j.send.QuickReply;
 import com.github.messenger4j.send.SenderAction;
+import com.vdurmont.emoji.EmojiManager;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,10 +29,10 @@ public class GetStartedCommand implements Command {
 
 
         sendClient.sendTextMessage(recipientId,
-                "Швидко дізнавайтесь статус ваших відправлень Нової Пошти " +
+                EmojiManager.getForAlias("red_circle").getUnicode()+ " " + "Швидко дізнавайтесь статус ваших відправлень Нової Пошти " +
                 "— просто надішліть номер накладної після вибору пункту \'Статус доставки\' " +
-                "і отримайте всю потрібну інформацію.  " +
-                "Щоб знайти найближчі відділення Нової пошти," +
+                "і отримайте всю потрібну інформацію.  \n" +
+                        EmojiManager.getForAlias("red_circle").getUnicode()+ " " + "Щоб знайти найближчі відділення Нової Пошти," +
                 " просто надішлість нам вашу локацію" , quickReplies);
 
         sendClient.sendSenderAction(recipientId, SenderAction.TYPING_OFF);

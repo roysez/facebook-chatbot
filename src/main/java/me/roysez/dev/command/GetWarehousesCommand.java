@@ -70,7 +70,7 @@ public class GetWarehousesCommand implements Command {
                 try {
                     AttachmentMessageEvent.Coordinates coordinates = payload.asLocationPayload().getCoordinates();
                     sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
-                    sendClient.sendTextMessage(recipientId,"Зачекайте будь-ласка, аналізуємо вашу локацію");
+                    sendClient.sendTextMessage(recipientId,"Зачекайте будь-ласка, аналізуємо ваше розташування");
                     sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
                     List<Warehouse> warehouses = getWarehousesByCity(
                             getCityByCoordinates(payload.asLocationPayload().getCoordinates()));

@@ -109,10 +109,11 @@ public class MessengerPlatformCallbackHandler {
             MessengerSetupClient setupClient = MessengerPlatform.newSetupClientBuilder(pageAccessToken).build();
             setupClient.setupStartButton("GET_STARTED_PAYLOAD");
             setupClient.setupPersistentMenu(menuButtons);
-            setupClient.setupWelcomeMessage("Вітаємо нового користувача," +
+            setupClient.setupWelcomeMessage("Вітаємо," +
                     " швидко дізнавайтесь поточне місце знаходження посилки " +
                     "та знаходьте найближчі відділення Нової Пошти до вашого місця знаходження " +
-                    " \n Не є офіційним додатком\'Нової пошти\'");
+                    " \n [ Не є офіційним додатком ]" +
+                    " \n [ Не здійснюємо підтримку клієнтів ]");
 
             logger.info("Menu setup - successful ");
         } catch (MessengerApiException e) {
