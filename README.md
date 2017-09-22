@@ -13,5 +13,6 @@ Implemented using Java, Spring Boot and Java library
 
 ![Alt Text](https://media.giphy.com/media/xT9IgtnxLs0IFUFsqI/giphy.gif)
 
+## License
 
-
+This project is under the MIT License. See the [LICENSE](https://github.com/roysez/facebook-chatbot/blob/master/LICENSE) file for the full license text.
