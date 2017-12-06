@@ -1,7 +1,8 @@
 # 'Нова Пошта' Chatbot for Facebook Messenger
 
-Facebook Messenger chatbot for Nova Poshta (Ukraine).
-
+Facebook Messenger chatbot for Nova Poshta (Ukraine).<br/><br/>
+['Messenger Link'](http://m.me/NP-Chatbot-134845507136246)
+<br/>
 Implemented using Java, Spring Boot and Java library
  ['messenger4j'](https://github.com/messenger4j/messenger4j)
   for building Chatbots on the Facebook Messenger Platform. Application deployed on [Heroku](https://dashboard.heroku.com/)
